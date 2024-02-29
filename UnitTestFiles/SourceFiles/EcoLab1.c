@@ -49,6 +49,10 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
     /* Указатель на тестируемый интерфейс */
     IEcoLab1* pIEcoLab1 = 0;
 
+    uint16_t N = 8, k = 8, i = 0;
+    double complex v[] = {1 , -1, 1, -1, 5, 4, 3, 2};
+
+
     /* Проверка и создание системного интрефейса */
     if (pISys == 0) {
         result = pIUnk->pVTbl->QueryInterface(pIUnk, &GID_IEcoSystem1, (void **)&pISys);
@@ -95,8 +99,10 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 
+    pIEcoLab1->pVTbl->dft(pIEcoLab1, N, k, v);
 
-    result = pIEcoLab1->pVTbl->MyFunction(pIEcoLab1, name, &copyName);
+    for(i = 0; i < k; ++i)
+        printf("%8.4f + %.4fi\n", creal(v[i]), cimag(v[i]));
 
 
     /* Освлбождение блока памяти */

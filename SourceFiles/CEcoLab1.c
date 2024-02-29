@@ -33,6 +33,7 @@
  * </описание>
  *
  */
+ 
 int16_t ECOCALLMETHOD CEcoLab1_QueryInterface(/* in */ struct IEcoLab1* me, /* in */ const UGUID* riid, /* out */ void** ppv) {
     CEcoLab1* pCMe = (CEcoLab1*)me;
 
@@ -112,7 +113,7 @@ uint32_t ECOCALLMETHOD CEcoLab1_Release(/* in */ struct IEcoLab1* me) {
 /*
  *
  * <сводка>
- *   Функция MyFunction
+ *   Функция fft
  * </сводка>
  *
  * <описание>
@@ -120,28 +121,30 @@ uint32_t ECOCALLMETHOD CEcoLab1_Release(/* in */ struct IEcoLab1* me) {
  * </описание>
  *
  */
-int16_t ECOCALLMETHOD CEcoLab1_MyFunction(/* in */ struct IEcoLab1* me, /* in */ char_t* Name, /* out */ char_t** copyName) {
+void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ uint16_t k, /* out */ double complex *v)
+{
     CEcoLab1* pCMe = (CEcoLab1*)me;
-    int16_t index = 0;
 
-    /* Проверка указателей */
-    if (me == 0 || Name == 0 || copyName == 0) {
-        return -1;
+    /* Output array should be >= initial array */
+    if (k < N || v == NULL) return;
+
+    int32_t i, j;
+    double complex res_dft[k], v_exp;
+
+    for(j = 0; j < k; ++j) {
+      res_dft[j] = 0;
+
+      for (i = 0; i < N; ++i) {
+        /* Compute the principal Nth root of unity */
+        v_exp = cexp((-I * 2 * M_PI * j * i) / N);
+
+        res_dft[j] += v[i] * v_exp;
+      }
     }
 
-    /* Копирование строки */
-    while(Name[index] != 0) {
-        index++;
-    }
-    pCMe->m_Name = (char_t*)pCMe->m_pIMem->pVTbl->Alloc(pCMe->m_pIMem, index + 1);
-    index = 0;
-    while(Name[index] != 0) {
-        pCMe->m_Name[index] = Name[index];
-        index++;
-    }
-    *copyName = pCMe->m_Name;
-
-    return 0;
+    /* Copy the result to the destination array */
+    for(i = 0; i < k; ++i)
+      v[i] = res_dft[i];
 }
 
 
@@ -195,7 +198,7 @@ IEcoLab1VTbl g_x277FC00C35624096AFCFC125B94EEC90VTbl = {
     CEcoLab1_QueryInterface,
     CEcoLab1_AddRef,
     CEcoLab1_Release,
-    CEcoLab1_MyFunction
+    CEcoLab1_dft
 };
 
 

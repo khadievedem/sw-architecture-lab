@@ -25,6 +25,8 @@
 #define __I_ECOLAB1_H__
 
 #include "IEcoBase1.h"
+#include <math.h>
+#include <complex.h>
 
 /* IEcoLab1 IID = {277FC00C-3562-4096-AFCF-C125B94EEC90} */
 #ifndef __IID_IEcoLab1
@@ -39,7 +41,7 @@ typedef struct IEcoLab1VTbl {
     uint32_t (ECOCALLMETHOD *Release)(/* in */ struct IEcoLab1* me);
 
     /* IEcoLab1 */
-    int16_t (ECOCALLMETHOD *MyFunction)(/* in */ struct IEcoLab1* me, /* in */ char_t* Name, /* out */ char_t** CopyName);
+    void (ECOCALLMETHOD *dft)(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ uint16_t k, /* out */ double complex *v);
 
 } IEcoLab1VTbl, *IEcoLab1VTblPtr;
 
