@@ -26,7 +26,12 @@
 
 #include "IEcoBase1.h"
 #include <math.h>
-#include <complex.h>
+
+typedef struct complexType {
+    double re;
+    double im;
+} complex_t;
+
 
 /* IEcoLab1 IID = {277FC00C-3562-4096-AFCF-C125B94EEC90} */
 #ifndef __IID_IEcoLab1
@@ -41,8 +46,13 @@ typedef struct IEcoLab1VTbl {
     uint32_t (ECOCALLMETHOD *Release)(/* in */ struct IEcoLab1* me);
 
     /* IEcoLab1 */
-    void (ECOCALLMETHOD *dft)(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ double complex *v_out);
-    void (ECOCALLMETHOD *fft)(/* in */ struct IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ double complex *v_out);
+    complex_t (ECOCALLMETHOD *AddComplex)(/* in */ struct IEcoLab1* me, /* int */ complex_t num1, /* int */ complex_t num2);
+    complex_t (ECOCALLMETHOD *SubComplex)(/* in */ struct IEcoLab1* me, /* int */ complex_t num1, /* int */ complex_t num2);
+    complex_t (ECOCALLMETHOD *MultiplyComplex)(/* in */ struct IEcoLab1* me, /* int */ complex_t num1, /* int */ complex_t num2);
+    complex_t (ECOCALLMETHOD *ExpComplex)(/* in */ struct IEcoLab1* me, /* int */ complex_t num);
+
+    void (ECOCALLMETHOD *dft)(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out);
+    void (ECOCALLMETHOD *fft)(/* in */ struct IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out);
 
 } IEcoLab1VTbl, *IEcoLab1VTblPtr;
 

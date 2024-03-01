@@ -115,6 +115,89 @@ uint32_t ECOCALLMETHOD CEcoLab1_Release(/* in */ struct IEcoLab1* me) {
 /*
  *
  * <сводка>
+ *   Функция AddComplex
+ * </сводка>
+ *
+ * <описание>
+ *   Функция
+ * </описание>
+ *
+ */
+complex_t CEcoLab1_AddComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t num1, /* int */ complex_t num2)
+{
+    CEcoLab1* pCMe = (CEcoLab1*)me;
+
+    return (complex_t) {.re = num1.re + num2.re, .im = num1.im + num2.im};
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция SubComplex
+ * </сводка>
+ *
+ * <описание>
+ *   Функция
+ * </описание>
+ *
+ */
+complex_t CEcoLab1_SubComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t num1, /* int */ complex_t num2)
+{
+    CEcoLab1* pCMe = (CEcoLab1*)me;
+
+    return (complex_t) {.re = num1.re - num2.re, .im = num1.im - num2.im};
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция MultiplyComplex
+ * </сводка>
+ *
+ * <описание>
+ *   Функция
+ * </описание>
+ *
+ */
+complex_t CEcoLab1_MultiplyComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t num1, /* int */ complex_t num2)
+{
+    CEcoLab1* pCMe = (CEcoLab1*)me;
+
+    return (complex_t) {
+      .re = (num1.re * num2.re) - (num1.im * num2.im),
+      .im = (num1.re * num2.im) - (num1.im * num2.re)
+    };
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция ExpComplex
+ * </сводка>
+ *
+ * <описание>
+ *   Функция
+ * </описание>
+ *
+ */
+complex_t CEcoLab1_ExpComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t num)
+{
+    CEcoLab1* pCMe = (CEcoLab1*)me;
+
+    complex_t res;
+    double r;
+    
+    r = exp(num.re);
+
+    return (complex_t) {
+        .re = r * cos(num.im),
+        .im = r * sin(num.im)
+    };
+}
+
+/*
+ *
+ * <сводка>
  *   Функция dft
  * </сводка>
  *
@@ -123,30 +206,48 @@ uint32_t ECOCALLMETHOD CEcoLab1_Release(/* in */ struct IEcoLab1* me) {
  * </описание>
  *
  */
-void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ double complex *v_out)
+void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out)
 {
-    CEcoLab1* pCMe = (CEcoLab1*)me;
+    IEcoLab1* pCMe = me;
 
     /* Output array should be >= initial array */
     if (v_in == NULL || v_out == NULL) return;
 
     int32_t i, j;
-    double complex res_dft[N], v_exp;
+    complex_t res_dft[N], v_exp, tmp;
 
     for(j = 0; j < N; ++j) {
-      res_dft[j] = 0;
+      res_dft[j].re = 0;
+      res_dft[j].im = 0;
 
       for (i = 0; i < N; ++i) {
         /* Compute the principal Nth root of unity */
-        v_exp = cexp((-I * 2 * PI * j * i) / N);
+        /* v_exp = cexp((-I * 2 * PI * j * i) / N); */
+        
+        v_exp.re = 0;
+        v_exp.im = (-1 * 2 * PI * j * i) / N;
 
-        res_dft[j] += v_in[i] * v_exp;
+        pCMe->pVTbl->AddRef(pCMe);
+        v_exp = pCMe->pVTbl->ExpComplex(pCMe, v_exp);
+        pCMe->pVTbl->Release(pCMe);
+
+        pCMe->pVTbl->AddRef(pCMe);
+        pCMe->pVTbl->AddRef(pCMe);
+        
+        tmp.re = 0;
+        tmp.im = v_in[i];
+        res_dft[j] = pCMe->pVTbl->AddComplex(pCMe, res_dft[j], pCMe->pVTbl->MultiplyComplex(pCMe, tmp, v_exp));
+        /* res_dft[j] += v_in[i] * v_exp; */
+        pCMe->pVTbl->Release(pCMe);
+        pCMe->pVTbl->Release(pCMe);
       }
     }
 
     /* Copy the result to the destination array */
-    for(i = 0; i < N; ++i)
-      v_out[i] = res_dft[i];
+    for(i = 0; i < N; ++i) {
+      v_out[i].re = res_dft[i].re;
+      v_out[i].im = res_dft[i].im;
+    }
 }
 
 /*
@@ -160,16 +261,17 @@ void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t 
  * </описание>
  *
  */
-void ECOCALLMETHOD CEcoLab1_fft(/* in */ IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ double complex *v_out)
+void ECOCALLMETHOD CEcoLab1_fft(/* in */ IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out)
 {
     IEcoLab1* pCMe = me;
 
     unsigned int k;
-    double complex t;
+    complex_t t, tmp;
 
     // At the lowest level pass through (delta T=0 means no phase).
     if (N == 1) {
-        v_out[0] = v_in[0];
+        v_out[0].re = v_in[0];
+        v_out[0].im = 0;
         return;
     }
 
@@ -183,9 +285,29 @@ void ECOCALLMETHOD CEcoLab1_fft(/* in */ IEcoLab1* me, /* in */ uint32_t stride,
     pCMe->pVTbl->Release(pCMe);
 
     for (k = 0; k < N/2; k++) {
-        t = v_out[k];
-        v_out[k] = t + cexp(-2 * PI * I * k / N) * v_out[k + N/2];
-        v_out[k + N/2] = t - cexp(-2 * PI * I * k / N) * v_out[k + N/2];
+        t.re = v_out[k].re;
+        t.im = v_out[k].im;
+
+        tmp.re = 0;
+        tmp.im = 2 * PI * k / N;
+
+        pCMe->pVTbl->AddRef(pCMe);
+        tmp = pCMe->pVTbl->ExpComplex(pCMe, tmp);
+        pCMe->pVTbl->Release(pCMe);
+
+        pCMe->pVTbl->AddRef(pCMe);
+        pCMe->pVTbl->AddRef(pCMe);
+        v_out[k] = pCMe->pVTbl->AddComplex(pCMe, t, pCMe->pVTbl->MultiplyComplex(pCMe, tmp, v_out[k + N/2]));
+        pCMe->pVTbl->Release(pCMe);
+        pCMe->pVTbl->Release(pCMe);
+
+        pCMe->pVTbl->AddRef(pCMe);
+        pCMe->pVTbl->AddRef(pCMe);
+        v_out[k + N/2] = pCMe->pVTbl->SubComplex(pCMe, t, pCMe->pVTbl->MultiplyComplex(pCMe, tmp, v_out[k + N/2]));
+        pCMe->pVTbl->Release(pCMe);
+        pCMe->pVTbl->Release(pCMe);
+        /* v_out[k] = t + cexp(-2 * PI * I * k / N) * v_out[k + N/2]; */
+        /* v_out[k + N/2] = t - cexp(-2 * PI * I * k / N) * v_out[k + N/2]; */
     }
 }
 
@@ -237,6 +359,10 @@ IEcoLab1VTbl g_x277FC00C35624096AFCFC125B94EEC90VTbl = {
     CEcoLab1_QueryInterface,
     CEcoLab1_AddRef,
     CEcoLab1_Release,
+    CEcoLab1_AddComplex,
+    CEcoLab1_SubComplex,
+    CEcoLab1_MultiplyComplex,
+    CEcoLab1_ExpComplex,
     CEcoLab1_dft,
     CEcoLab1_fft
 };
