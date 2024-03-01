@@ -22,6 +22,8 @@
 #include "IEcoInterfaceBus1MemExt.h"
 #include "CEcoLab1.h"
 
+#define PI 3.14159265358979323846
+
 /*
  *
  * <сводка>
@@ -113,6 +115,43 @@ uint32_t ECOCALLMETHOD CEcoLab1_Release(/* in */ struct IEcoLab1* me) {
 /*
  *
  * <сводка>
+ *   Функция dft
+ * </сводка>
+ *
+ * <описание>
+ *   Функция
+ * </описание>
+ *
+ */
+void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ double complex *v_out)
+{
+    CEcoLab1* pCMe = (CEcoLab1*)me;
+
+    /* Output array should be >= initial array */
+    if (v_in == NULL || v_out == NULL) return;
+
+    int32_t i, j;
+    double complex res_dft[N], v_exp;
+
+    for(j = 0; j < N; ++j) {
+      res_dft[j] = 0;
+
+      for (i = 0; i < N; ++i) {
+        /* Compute the principal Nth root of unity */
+        v_exp = cexp((-I * 2 * PI * j * i) / N);
+
+        res_dft[j] += v_in[i] * v_exp;
+      }
+    }
+
+    /* Copy the result to the destination array */
+    for(i = 0; i < N; ++i)
+      v_out[i] = res_dft[i];
+}
+
+/*
+ *
+ * <сводка>
  *   Функция fft
  * </сводка>
  *
@@ -121,34 +160,34 @@ uint32_t ECOCALLMETHOD CEcoLab1_Release(/* in */ struct IEcoLab1* me) {
  * </описание>
  *
  */
-void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ uint16_t k, /* out */ double complex *v)
+void ECOCALLMETHOD CEcoLab1_fft(/* in */ IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ double complex *v_out)
 {
-    CEcoLab1* pCMe = (CEcoLab1*)me;
+    IEcoLab1* pCMe = me;
 
-    /* Output array should be >= initial array */
-    if (k < N || v == NULL) return;
+    unsigned int k;
+    double complex t;
 
-    int32_t i, j;
-    double complex res_dft[k], v_exp;
-
-    for(j = 0; j < k; ++j) {
-      res_dft[j] = 0;
-
-      for (i = 0; i < N; ++i) {
-        /* Compute the principal Nth root of unity */
-        v_exp = cexp((-I * 2 * M_PI * j * i) / N);
-
-        res_dft[j] += v[i] * v_exp;
-      }
+    // At the lowest level pass through (delta T=0 means no phase).
+    if (N == 1) {
+        v_out[0] = v_in[0];
+        return;
     }
 
-    /* Copy the result to the destination array */
-    for(i = 0; i < k; ++i)
-      v[i] = res_dft[i];
+    // Cooley-Tukey: recursively split in two, then combine beneath.
+    pCMe->pVTbl->AddRef(pCMe);
+    pCMe->pVTbl->fft(pCMe, 2*stride, N/2, v_in, v_out);
+    pCMe->pVTbl->Release(pCMe);
+
+    pCMe->pVTbl->AddRef(pCMe);
+    pCMe->pVTbl->fft(pCMe, 2*stride, N/2, v_in + stride, v_out + N/2);
+    pCMe->pVTbl->Release(pCMe);
+
+    for (k = 0; k < N/2; k++) {
+        t = v_out[k];
+        v_out[k] = t + cexp(-2 * PI * I * k / N) * v_out[k + N/2];
+        v_out[k + N/2] = t - cexp(-2 * PI * I * k / N) * v_out[k + N/2];
+    }
 }
-
-
-
 
 /*
  *
@@ -198,7 +237,8 @@ IEcoLab1VTbl g_x277FC00C35624096AFCFC125B94EEC90VTbl = {
     CEcoLab1_QueryInterface,
     CEcoLab1_AddRef,
     CEcoLab1_Release,
-    CEcoLab1_dft
+    CEcoLab1_dft,
+    CEcoLab1_fft
 };
 
 

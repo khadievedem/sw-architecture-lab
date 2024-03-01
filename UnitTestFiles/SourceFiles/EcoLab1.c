@@ -44,13 +44,16 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
     IEcoInterfaceBus1* pIBus = 0;
     /* Указатель на интерфейс работы с памятью */
     IEcoMemoryAllocator1* pIMem = 0;
-    char_t* name = 0;
-    char_t* copyName = 0;
     /* Указатель на тестируемый интерфейс */
     IEcoLab1* pIEcoLab1 = 0;
 
-    uint16_t N = 8, k = 8, i = 0;
-    double complex v[] = {1 , -1, 1, -1, 5, 4, 3, 2};
+    clock_t t; 
+    uint16_t N;
+    uint32_t i;
+    double time_taken;
+
+    int32_t *v_src;
+    double complex *v_res;
 
 
     /* Проверка и создание системного интрефейса */
@@ -85,12 +88,23 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 
+    N = 8;
     /* Выделение блока памяти */
-    name = (char_t *)pIMem->pVTbl->Alloc(pIMem, 10);
+    v_src = (int32_t *)pIMem->pVTbl->Alloc(pIMem, N * sizeof(int32_t));
+    v_res = (double complex *)pIMem->pVTbl->Alloc(pIMem, N * sizeof(double complex));
 
-    /* Заполнение блока памяти */
-    pIMem->pVTbl->Fill(pIMem, name, 'a', 9);
+    v_src[0] = 1;
+    v_src[1] = -1;
+    v_src[2] = 1;
+    v_src[3] = -1;
+    v_src[4] = 5;
+    v_src[5] = 4;
+    v_src[6] = 3;
+    v_src[7] = 2;
 
+    for (i = 0; i < N; ++i) {
+      v_res[i] = 0;
+    }
 
     /* Получение тестируемого интерфейса */
     result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**) &pIEcoLab1);
@@ -99,14 +113,31 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 
-    pIEcoLab1->pVTbl->dft(pIEcoLab1, N, k, v);
-
-    for(i = 0; i < k; ++i)
-        printf("%8.4f + %.4fi\n", creal(v[i]), cimag(v[i]));
+    /* pIEcoLab1->pVTbl->dft(pIEcoLab1, N, k, v); */
+    t = clock(); 
+    for (i = 0; i < 1000000; ++i) {
+      pIEcoLab1->pVTbl->fft(pIEcoLab1, 1, N, v_src, v_res);
+    }
+    t = clock() - t; 
+    time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+    printf("FFT [%f]: \n", time_taken);
+    for(i = 0; i < N; ++i)
+        printf("%8.4f + %.4fi\n", creal(v_res[i]), cimag(v_res[i]));
+    putc('\n', stdout);
+    t = clock(); 
+    for (i = 0; i < 1000000; ++i) {
+      pIEcoLab1->pVTbl->dft(pIEcoLab1, N, v_src, v_res);
+    }
+    t = clock() - t; 
+    time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+    printf("DFT [%f]: \n", time_taken);
+    for(i = 0; i < N; ++i)
+        printf("%8.4f + %.4fi\n", creal(v_res[i]), cimag(v_res[i]));
 
 
     /* Освлбождение блока памяти */
-    pIMem->pVTbl->Free(pIMem, name);
+    pIMem->pVTbl->Free(pIMem, v_src);
+    pIMem->pVTbl->Free(pIMem, v_res);
 
 Release:
 
