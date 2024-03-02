@@ -119,7 +119,7 @@ uint32_t ECOCALLMETHOD CEcoLab1_Release(/* in */ struct IEcoLab1* me) {
  * </сводка>
  *
  * <описание>
- *   Функция
+ *   Функция считает сумму комплексных чисел num1 и num2
  * </описание>
  *
  */
@@ -137,7 +137,7 @@ complex_t CEcoLab1_AddComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t 
  * </сводка>
  *
  * <описание>
- *   Функция
+ *   Функция считает разность комплексных чисел num1 и num2
  * </описание>
  *
  */
@@ -145,7 +145,10 @@ complex_t CEcoLab1_SubComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t 
 {
     CEcoLab1* pCMe = (CEcoLab1*)me;
 
-    return (complex_t) {.re = num1.re - num2.re, .im = num1.im - num2.im};
+    return (complex_t) {
+        .re = num1.re - num2.re,
+        .im = num1.im - num2.im
+    };
 }
 
 /*
@@ -155,7 +158,7 @@ complex_t CEcoLab1_SubComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t 
  * </сводка>
  *
  * <описание>
- *   Функция
+ *   Функция считает произведение комплексных чисел num1 и num2
  * </описание>
  *
  */
@@ -165,7 +168,7 @@ complex_t CEcoLab1_MultiplyComplex(/* in */ struct IEcoLab1* me, /* int */ compl
 
     return (complex_t) {
       .re = (num1.re * num2.re) - (num1.im * num2.im),
-      .im = (num1.re * num2.im) - (num1.im * num2.re)
+      .im = (num1.re * num2.im) + (num1.im * num2.re)
     };
 }
 
@@ -176,7 +179,7 @@ complex_t CEcoLab1_MultiplyComplex(/* in */ struct IEcoLab1* me, /* int */ compl
  * </сводка>
  *
  * <описание>
- *   Функция
+ *   Функция экспоненту от комплексного числа num
  * </описание>
  *
  */
@@ -202,13 +205,13 @@ complex_t CEcoLab1_ExpComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t 
  * </сводка>
  *
  * <описание>
- *   Функция
+ *   Функция считает Дискретное преобразование фурье со сложностью O(n^2)
  * </описание>
  *
  */
 void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out)
 {
-    IEcoLab1* pCMe = me;
+    CEcoLab1* pCMe = (CEcoLab1*)me;
 
     /* Output array should be >= initial array */
     if (v_in == NULL || v_out == NULL) return;
@@ -222,24 +225,24 @@ void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t 
 
       for (i = 0; i < N; ++i) {
         /* Compute the principal Nth root of unity */
-        /* v_exp = cexp((-I * 2 * PI * j * i) / N); */
-        
         v_exp.re = 0;
         v_exp.im = (-1 * 2 * PI * j * i) / N;
 
-        pCMe->pVTbl->AddRef(pCMe);
-        v_exp = pCMe->pVTbl->ExpComplex(pCMe, v_exp);
-        pCMe->pVTbl->Release(pCMe);
+        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+        v_exp = pCMe->m_pVTblIEcoLab1->ExpComplex((IEcoLab1*)pCMe, v_exp);
+        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
 
-        pCMe->pVTbl->AddRef(pCMe);
-        pCMe->pVTbl->AddRef(pCMe);
+        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
         
-        tmp.re = 0;
-        tmp.im = v_in[i];
-        res_dft[j] = pCMe->pVTbl->AddComplex(pCMe, res_dft[j], pCMe->pVTbl->MultiplyComplex(pCMe, tmp, v_exp));
-        /* res_dft[j] += v_in[i] * v_exp; */
-        pCMe->pVTbl->Release(pCMe);
-        pCMe->pVTbl->Release(pCMe);
+        /* tmp.re = 0;
+        tmp.im = v_in[i]; */
+        tmp.re = v_in[i];
+        tmp.im = 0;
+        tmp = pCMe->m_pVTblIEcoLab1->MultiplyComplex((IEcoLab1*)pCMe, tmp, v_exp);
+        res_dft[j] = pCMe->m_pVTblIEcoLab1->AddComplex((IEcoLab1*)pCMe, res_dft[j], tmp);
+        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
       }
     }
 
@@ -257,57 +260,68 @@ void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t 
  * </сводка>
  *
  * <описание>
- *   Функция
+ *   Функция считает Быстрое преобразование фурье со сложностью O(n*log(n))
  * </описание>
  *
  */
 void ECOCALLMETHOD CEcoLab1_fft(/* in */ IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out)
 {
-    IEcoLab1* pCMe = me;
+    CEcoLab1* pCMe = (CEcoLab1*)me;
 
     unsigned int k;
     complex_t t, tmp;
 
-    // At the lowest level pass through (delta T=0 means no phase).
+    // At the lowest level pass through
     if (N == 1) {
         v_out[0].re = v_in[0];
         v_out[0].im = 0;
         return;
     }
 
-    // Cooley-Tukey: recursively split in two, then combine beneath.
-    pCMe->pVTbl->AddRef(pCMe);
-    pCMe->pVTbl->fft(pCMe, 2*stride, N/2, v_in, v_out);
-    pCMe->pVTbl->Release(pCMe);
+    // Recursively split in two, then combine beneath.
+    pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+    pCMe->m_pVTblIEcoLab1->fft((IEcoLab1*)pCMe, 2*stride, N/2, v_in, v_out);
+    pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
 
-    pCMe->pVTbl->AddRef(pCMe);
-    pCMe->pVTbl->fft(pCMe, 2*stride, N/2, v_in + stride, v_out + N/2);
-    pCMe->pVTbl->Release(pCMe);
+    pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+    pCMe->m_pVTblIEcoLab1->fft((IEcoLab1*)pCMe, 2*stride, N/2, v_in + stride, v_out + N/2);
+    pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
 
     for (k = 0; k < N/2; k++) {
         t.re = v_out[k].re;
         t.im = v_out[k].im;
 
+        /* Odd numbers */
         tmp.re = 0;
         tmp.im = 2 * PI * k / N;
 
-        pCMe->pVTbl->AddRef(pCMe);
-        tmp = pCMe->pVTbl->ExpComplex(pCMe, tmp);
-        pCMe->pVTbl->Release(pCMe);
+        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+        tmp = pCMe->m_pVTblIEcoLab1->ExpComplex((IEcoLab1*)pCMe, tmp);
+        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
 
-        pCMe->pVTbl->AddRef(pCMe);
-        pCMe->pVTbl->AddRef(pCMe);
-        v_out[k] = pCMe->pVTbl->AddComplex(pCMe, t, pCMe->pVTbl->MultiplyComplex(pCMe, tmp, v_out[k + N/2]));
-        pCMe->pVTbl->Release(pCMe);
-        pCMe->pVTbl->Release(pCMe);
+        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+        tmp = pCMe->m_pVTblIEcoLab1->MultiplyComplex((IEcoLab1*)pCMe, tmp, v_out[k + N/2]);
+        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
 
-        pCMe->pVTbl->AddRef(pCMe);
-        pCMe->pVTbl->AddRef(pCMe);
-        v_out[k + N/2] = pCMe->pVTbl->SubComplex(pCMe, t, pCMe->pVTbl->MultiplyComplex(pCMe, tmp, v_out[k + N/2]));
-        pCMe->pVTbl->Release(pCMe);
-        pCMe->pVTbl->Release(pCMe);
-        /* v_out[k] = t + cexp(-2 * PI * I * k / N) * v_out[k + N/2]; */
-        /* v_out[k + N/2] = t - cexp(-2 * PI * I * k / N) * v_out[k + N/2]; */
+        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+        v_out[k] = pCMe->m_pVTblIEcoLab1->AddComplex((IEcoLab1*)pCMe, t, tmp);
+        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+
+        /* Even numbers */
+        tmp.re = 0;
+        tmp.im = 2 * PI * k / N;
+
+        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+        tmp = pCMe->m_pVTblIEcoLab1->ExpComplex((IEcoLab1*)pCMe, tmp);
+        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+
+        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+        tmp = pCMe->m_pVTblIEcoLab1->MultiplyComplex((IEcoLab1*)pCMe, tmp, v_out[k + N/2]);
+        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+
+        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+        v_out[k + N/2] = pCMe->m_pVTblIEcoLab1->SubComplex((IEcoLab1*)pCMe, t, tmp);
+        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
     }
 }
 
