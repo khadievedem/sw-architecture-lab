@@ -124,9 +124,12 @@ uint32_t ECOCALLMETHOD CEcoLab1_Release(/* in */ struct IEcoLab1* me) {
  * </описание>
  *
  */
-void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out)
+void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint32_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out)
 {
     CEcoLab1* pCMe = (CEcoLab1*)me;
+
+    uint32_t i, j;
+    complex_t res_dft[N], v_exp, tmp;
 
     /* Проверка указателей */
     if (me == 0 ) {
@@ -135,9 +138,6 @@ void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t 
 
     /* Output array should be >= initial array */
     if (v_in == NULL || v_out == NULL) return;
-
-    int32_t i, j;
-    complex_t res_dft[N], v_exp, tmp;
 
     for(j = 0; j < N; ++j) {
       res_dft[j].re = 0;
@@ -184,12 +184,15 @@ void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t 
  * </описание>
  *
  */
-void ECOCALLMETHOD CEcoLab1_fft(/* in */ IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out)
+void ECOCALLMETHOD CEcoLab1_fft(/* in */ IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint32_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out)
 {
     CEcoLab1* pCMe = (CEcoLab1*)me;
 
-    unsigned int k;
+    uint32_t k;
     complex_t t, tmp;
+
+    /* Output array should be >= initial array */
+    if (v_in == NULL || v_out == NULL) return;
 
     // At the lowest level pass through
     if (N == 1) {
@@ -197,7 +200,6 @@ void ECOCALLMETHOD CEcoLab1_fft(/* in */ IEcoLab1* me, /* in */ uint32_t stride,
         v_out[0].im = 0;
         return;
     }
-
     // Recursively split in two, then combine beneath.
     pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
     pCMe->m_pVTblIEcoLab1->fft((IEcoLab1*)pCMe, 2*stride, N/2, v_in, v_out);
@@ -215,33 +217,17 @@ void ECOCALLMETHOD CEcoLab1_fft(/* in */ IEcoLab1* me, /* in */ uint32_t stride,
         tmp.re = 0;
         tmp.im = 2 * PI * k / N;
 
-        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
         tmp = pCMe->m_pICmplx->pVTbl->ExpComplex((IEcoComplex1*)pCMe, tmp);
-        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
-
-        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
         tmp = pCMe->m_pICmplx->pVTbl->MultiplyComplex((IEcoComplex1*)pCMe, tmp, v_out[k + N/2]);
-        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
-
-        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
         v_out[k] = pCMe->m_pICmplx->pVTbl->AddComplex((IEcoComplex1*)pCMe, t, tmp);
-        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
 
         /* Even numbers */
         tmp.re = 0;
         tmp.im = 2 * PI * k / N;
 
-        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
         tmp = pCMe->m_pICmplx->pVTbl->ExpComplex((IEcoComplex1*)pCMe, tmp);
-        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
-
-        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
         tmp = pCMe->m_pICmplx->pVTbl->MultiplyComplex((IEcoComplex1*)pCMe, tmp, v_out[k + N/2]);
-        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
-
-        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
         v_out[k + N/2] = pCMe->m_pICmplx->pVTbl->SubComplex((IEcoComplex1*)pCMe, t, tmp);
-        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
     }
 }
 

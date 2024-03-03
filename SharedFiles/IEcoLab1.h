@@ -40,8 +40,8 @@ typedef struct IEcoLab1VTbl {
     uint32_t (ECOCALLMETHOD *Release)(/* in */ struct IEcoLab1* me);
 
     /* IEcoLab1 */
-    void (ECOCALLMETHOD *dft)(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out);
-    void (ECOCALLMETHOD *fft)(/* in */ struct IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out);
+    void (ECOCALLMETHOD *dft)(/* in */ struct IEcoLab1* me, /* in */ uint32_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out);
+    void (ECOCALLMETHOD *fft)(/* in */ struct IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint32_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out);
 
 } IEcoLab1VTbl, *IEcoLab1VTblPtr;
 

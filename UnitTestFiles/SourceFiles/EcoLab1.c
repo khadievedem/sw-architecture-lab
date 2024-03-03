@@ -50,13 +50,15 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
     IEcoDateTime1* pIDTime = 0;
     /* Указатель на тестируемый интерфейс */
     IEcoLab1* pIEcoLab1 = 0;
+    /* Source vector for dft/fft counting */
+    int32_t   *v_src = 0;
+    /* Result vector for dft/fft result */
+    complex_t *v_res = 0;
 
-    ECOTIMEVAL t_start, t_end, time_taken;
-    uint16_t N;
-    uint32_t i;
+    ECOTIMEVAL t_start, t_end;
+    double_t time_taken;
 
-    int32_t *v_src;
-    complex_t *v_res;
+    uint32_t i, j, N;
 
 
     /* Проверка и создание системного интрефейса */
@@ -114,24 +116,9 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 
-    N = 8;
-    /* Выделение блока памяти */
-    v_src = (int32_t *)pIMem->pVTbl->Alloc(pIMem, N * sizeof(int32_t));
-    v_res = (complex_t *)pIMem->pVTbl->Alloc(pIMem, N * sizeof(complex_t));
-
-    v_src[0] = 1;
-    v_src[1] = -1;
-    v_src[2] = 1;
-    v_src[3] = -1;
-    v_src[4] = 5;
-    v_src[5] = 4;
-    v_src[6] = 3;
-    v_src[7] = 2;
-
-    for (i = 0; i < N; ++i) {
-      v_res[i].re = 0;
-      v_res[i].im = 0;
-    }
+    /* Seed for random numbers */
+    pIDTime = pIDTime->pVTbl->Now(pIDTime);
+    srand((uint32_t)pIDTime->pVTbl->get_TimeOfDayUSec(pIDTime));
 
     /* Получение тестируемого интерфейса */
     result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoLab1, 0, &IID_IEcoLab1, (void**) &pIEcoLab1);
@@ -140,42 +127,98 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 
-    pIDTime = pIDTime->pVTbl->Now(pIDTime); 
-    t_start = *pIDTime->pVTbl->get_SystemTime(pIDTime); 
-    for (i = 0; i < 1000000; ++i) {
-      pIEcoLab1->pVTbl->dft(pIEcoLab1, N, v_src, v_res);
+    /* Macros for counting time spent on the function */
+    #define COUNT_TIME(FUNC) \
+            do { \
+                pIDTime = pIDTime->pVTbl->Now(pIDTime); \
+                t_start = *pIDTime->pVTbl->get_SystemTime(pIDTime); \
+                FUNC; \
+                pIDTime = pIDTime->pVTbl->Now(pIDTime); \
+                t_end   = *pIDTime->pVTbl->get_SystemTime(pIDTime); \
+                printf("Took: %5us %9uus", t_end.tv_sec - t_start.tv_sec, t_end.tv_usec - t_start.tv_usec); \
+            } while (0)
+    
+    printf("Iterations:\t\t|\tDFT:\t\t\t|\tFFT:\n");
+    for (i = 100; i < 50001; i += 3000) {
+        N = i; /* Number of elements in vector */
+
+        /* Allocate memory for source and result vectors */
+        v_src = (int32_t *)pIMem->pVTbl->Alloc(pIMem, N * sizeof(int32_t));
+        v_res = (complex_t *)pIMem->pVTbl->Alloc(pIMem, N * sizeof(complex_t));
+
+        /* Fill source vector with random numbers */
+        for (j = 0; j < N; ++j) {
+            v_src[j] = rand() % 1000000; 
+        }
+
+        printf("%9d\t\t|", N);
+        COUNT_TIME(pIEcoLab1->pVTbl->dft(pIEcoLab1, N, v_src, v_res));
+        putc('\t', stdout);
+        putc('|', stdout);
+        COUNT_TIME(pIEcoLab1->pVTbl->fft(pIEcoLab1, 1, N, v_src, v_res));
+        putc('\n', stdout);
+
+        /* Free allocated memory */
+        pIMem->pVTbl->Free(pIMem, v_src);
+        pIMem->pVTbl->Free(pIMem, v_res);
     }
-    pIDTime = pIDTime->pVTbl->Now(pIDTime); 
-    t_end = *pIDTime->pVTbl->get_SystemTime(pIDTime); 
 
-    time_taken.tv_sec = t_end.tv_sec - t_start.tv_sec;
-    time_taken.tv_usec = t_end.tv_usec - t_start.tv_usec;
-    printf("DFT [%us %uus]: \n", time_taken.tv_sec, time_taken.tv_usec);
-
-    for(i = 0; i < N; ++i)
-        printf("%8.4f + %.4fi\n", v_res[i].re, v_res[i].im);
-
-    /* printf("[DFT] %s\n", pIDTime->pVTbl->ToString(pIDTime)); */
-
-    pIDTime = pIDTime->pVTbl->Now(pIDTime); 
-    t_start = *pIDTime->pVTbl->get_SystemTime(pIDTime); 
-    for (i = 0; i < 1000000; ++i) {
-      pIEcoLab1->pVTbl->fft(pIEcoLab1, 1, N, v_src, v_res);
-    }
-    pIDTime = pIDTime->pVTbl->Now(pIDTime); 
-    t_end = *pIDTime->pVTbl->get_SystemTime(pIDTime); 
-
-    time_taken.tv_sec = t_end.tv_sec - t_start.tv_sec;
-    time_taken.tv_usec = t_end.tv_usec - t_start.tv_usec;
-    printf("FFT [%us %uus]: \n", time_taken.tv_sec, time_taken.tv_usec);
-    for(i = 0; i < N; ++i)
-        printf("%8.4f + %.4fi\n", v_res[i].re, v_res[i].im);
     putc('\n', stdout);
+    putc('\n', stdout);
+    time_taken = 0;
+    printf("Spent time on 100 iters with N = 5000:\n");
+    printf("DFT: ");
+    {
+        for (i = 0; i < 100; ++i) {
+            N = 5000; /* Number of elements in vector */
 
+            /* Allocate memory for source and result vectors */
+            v_src = (int32_t *)pIMem->pVTbl->Alloc(pIMem, N * sizeof(int32_t));
+            v_res = (complex_t *)pIMem->pVTbl->Alloc(pIMem, N * sizeof(complex_t));
 
-    /* Освлбождение блока памяти */
-    pIMem->pVTbl->Free(pIMem, v_src);
-    pIMem->pVTbl->Free(pIMem, v_res);
+            /* Fill source vector with random numbers */
+            for (j = 0; j < N; ++j) {
+                v_src[j] = rand() % 1000000; 
+            }
+            pIDTime = pIDTime->pVTbl->Now(pIDTime);
+            t_start = *pIDTime->pVTbl->get_SystemTime(pIDTime);
+                pIEcoLab1->pVTbl->dft(pIEcoLab1, N, v_src, v_res);
+            pIDTime = pIDTime->pVTbl->Now(pIDTime);
+            t_end   = *pIDTime->pVTbl->get_SystemTime(pIDTime);
+            time_taken = ((double_t)(t_end.tv_sec - t_start.tv_sec) + ((double_t)(t_end.tv_usec - t_start.tv_usec) / 1000000.0)) / 60.0;
+            /* Free allocated memory */
+            pIMem->pVTbl->Free(pIMem, v_src);
+            pIMem->pVTbl->Free(pIMem, v_res);
+        }
+        printf("%6.6fm", time_taken); \
+    }
+    putc('\n', stdout);
+    printf("FFT: ");
+    {
+        for (i = 0; i < 100; ++i) {
+            N = 5000; /* Number of elements in vector */
+
+            /* Allocate memory for source and result vectors */
+            v_src = (int32_t *)pIMem->pVTbl->Alloc(pIMem, N * sizeof(int32_t));
+            v_res = (complex_t *)pIMem->pVTbl->Alloc(pIMem, N * sizeof(complex_t));
+
+            /* Fill source vector with random numbers */
+            for (j = 0; j < N; ++j) {
+                v_src[j] = rand() % 1000000; 
+            }
+            pIDTime = pIDTime->pVTbl->Now(pIDTime);
+            t_start = *pIDTime->pVTbl->get_SystemTime(pIDTime);
+                pIEcoLab1->pVTbl->fft(pIEcoLab1, 1, N, v_src, v_res);
+            pIDTime = pIDTime->pVTbl->Now(pIDTime);
+            t_end   = *pIDTime->pVTbl->get_SystemTime(pIDTime);
+            time_taken = ((double_t)(t_end.tv_sec - t_start.tv_sec) + ((double_t)(t_end.tv_usec - t_start.tv_usec) / 1000000.0)) / 60.0;
+            /* Free allocated memory */
+            pIMem->pVTbl->Free(pIMem, v_src);
+            pIMem->pVTbl->Free(pIMem, v_res);
+        }
+        printf("%6.6fm", time_taken); \
+    }
+    putc('\n', stdout);
 
 Release:
 
