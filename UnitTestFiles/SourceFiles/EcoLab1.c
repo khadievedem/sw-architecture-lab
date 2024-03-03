@@ -23,6 +23,7 @@
 #include "IdEcoMemoryManager1.h"
 #include "IdEcoInterfaceBus1.h"
 #include "IdEcoFileSystemManagement1.h"
+#include "IdEcoDateTime1.h"
 #include "IdEcoComplex1.h"
 #include "IdEcoLab1.h"
 
@@ -45,13 +46,14 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
     IEcoInterfaceBus1* pIBus = 0;
     /* Указатель на интерфейс работы с памятью */
     IEcoMemoryAllocator1* pIMem = 0;
+    /* Указатель на интерфейс рабоns со временем */
+    IEcoDateTime1* pIDTime = 0;
     /* Указатель на тестируемый интерфейс */
     IEcoLab1* pIEcoLab1 = 0;
 
-    clock_t t; 
+    ECOTIMEVAL t_start, t_end, time_taken;
     uint16_t N;
     uint32_t i;
-    double time_taken;
 
     int32_t *v_src;
     complex_t *v_res;
@@ -73,7 +75,14 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 #ifdef ECO_LIB
-    /* Регистрация статического компонента для работы со списком */
+    /* Регистрация статического компонента для работы со временем */
+    result = pIBus->pVTbl->RegisterComponent(pIBus, &CID_EcoDateTime1, (IEcoUnknown*)GetIEcoComponentFactoryPtr_5B2BA17BEA704527BC708F88568FE115);
+    if (result != 0 ) {
+        /* Освобождение в случае ошибки */
+        goto Release;
+    }
+
+    /* Регистрация статического компонента для работы с комплексными числами */
     result = pIBus->pVTbl->RegisterComponent(pIBus, &CID_EcoComplex1, (IEcoUnknown*)GetIEcoComponentFactoryPtr_1F5DF16EE1BF43B999A434ED38FFFFFF);
     if (result != 0 ) {
         /* Освобождение в случае ошибки */
@@ -92,6 +101,15 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
 
     /* Проверка */
     if (result != 0 || pIMem == 0) {
+        /* Освобождение системного интерфейса в случае ошибки */
+        goto Release;
+    }
+
+    /* Получение интерфейса для работы со временем */
+    result = pIBus->pVTbl->QueryComponent(pIBus, &CID_EcoDateTime1, 0, &IID_IEcoDateTime1, (void**) &pIDTime);
+
+    /* Проверка */
+    if (result != 0 || pIDTime == 0) {
         /* Освобождение системного интерфейса в случае ошибки */
         goto Release;
     }
@@ -122,23 +140,34 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 
-    t = clock(); 
+    pIDTime = pIDTime->pVTbl->Now(pIDTime); 
+    t_start = *pIDTime->pVTbl->get_SystemTime(pIDTime); 
     for (i = 0; i < 1000000; ++i) {
       pIEcoLab1->pVTbl->dft(pIEcoLab1, N, v_src, v_res);
     }
-    t = clock() - t; 
-    time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
-    printf("DFT [%f]: \n", time_taken);
+    pIDTime = pIDTime->pVTbl->Now(pIDTime); 
+    t_end = *pIDTime->pVTbl->get_SystemTime(pIDTime); 
+
+    time_taken.tv_sec = t_end.tv_sec - t_start.tv_sec;
+    time_taken.tv_usec = t_end.tv_usec - t_start.tv_usec;
+    printf("DFT [%us %uus]: \n", time_taken.tv_sec, time_taken.tv_usec);
+
     for(i = 0; i < N; ++i)
         printf("%8.4f + %.4fi\n", v_res[i].re, v_res[i].im);
 
-    t = clock(); 
+    /* printf("[DFT] %s\n", pIDTime->pVTbl->ToString(pIDTime)); */
+
+    pIDTime = pIDTime->pVTbl->Now(pIDTime); 
+    t_start = *pIDTime->pVTbl->get_SystemTime(pIDTime); 
     for (i = 0; i < 1000000; ++i) {
       pIEcoLab1->pVTbl->fft(pIEcoLab1, 1, N, v_src, v_res);
     }
-    t = clock() - t; 
-    time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
-    printf("FFT [%f]: \n", time_taken);
+    pIDTime = pIDTime->pVTbl->Now(pIDTime); 
+    t_end = *pIDTime->pVTbl->get_SystemTime(pIDTime); 
+
+    time_taken.tv_sec = t_end.tv_sec - t_start.tv_sec;
+    time_taken.tv_usec = t_end.tv_usec - t_start.tv_usec;
+    printf("FFT [%us %uus]: \n", time_taken.tv_sec, time_taken.tv_usec);
     for(i = 0; i < N; ++i)
         printf("%8.4f + %.4fi\n", v_res[i].re, v_res[i].im);
     putc('\n', stdout);
