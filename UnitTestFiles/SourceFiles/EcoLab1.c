@@ -23,6 +23,7 @@
 #include "IdEcoMemoryManager1.h"
 #include "IdEcoInterfaceBus1.h"
 #include "IdEcoFileSystemManagement1.h"
+#include "IdEcoComplex1.h"
 #include "IdEcoLab1.h"
 
 /*
@@ -73,6 +74,13 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
     }
 #ifdef ECO_LIB
     /* Регистрация статического компонента для работы со списком */
+    result = pIBus->pVTbl->RegisterComponent(pIBus, &CID_EcoComplex1, (IEcoUnknown*)GetIEcoComponentFactoryPtr_1F5DF16EE1BF43B999A434ED38FFFFFF);
+    if (result != 0 ) {
+        /* Освобождение в случае ошибки */
+        goto Release;
+    }
+
+    /* Регистрация статического компонента для работы со списком */
     result = pIBus->pVTbl->RegisterComponent(pIBus, &CID_EcoLab1, (IEcoUnknown*)GetIEcoComponentFactoryPtr_1F5DF16EE1BF43B999A434ED38FE8F3A);
     if (result != 0 ) {
         /* Освобождение в случае ошибки */
@@ -114,7 +122,16 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
         goto Release;
     }
 
-    /* pIEcoLab1->pVTbl->dft(pIEcoLab1, N, k, v); */
+    t = clock(); 
+    for (i = 0; i < 1000000; ++i) {
+      pIEcoLab1->pVTbl->dft(pIEcoLab1, N, v_src, v_res);
+    }
+    t = clock() - t; 
+    time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
+    printf("DFT [%f]: \n", time_taken);
+    for(i = 0; i < N; ++i)
+        printf("%8.4f + %.4fi\n", v_res[i].re, v_res[i].im);
+
     t = clock(); 
     for (i = 0; i < 1000000; ++i) {
       pIEcoLab1->pVTbl->fft(pIEcoLab1, 1, N, v_src, v_res);
@@ -125,15 +142,6 @@ int16_t EcoMain(IEcoUnknown* pIUnk) {
     for(i = 0; i < N; ++i)
         printf("%8.4f + %.4fi\n", v_res[i].re, v_res[i].im);
     putc('\n', stdout);
-    t = clock(); 
-    for (i = 0; i < 1000000; ++i) {
-      pIEcoLab1->pVTbl->dft(pIEcoLab1, N, v_src, v_res);
-    }
-    t = clock() - t; 
-    time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds 
-    printf("DFT [%f]: \n", time_taken);
-    for(i = 0; i < N; ++i)
-        printf("%8.4f + %.4fi\n", v_res[i].re, v_res[i].im);
 
 
     /* Освлбождение блока памяти */

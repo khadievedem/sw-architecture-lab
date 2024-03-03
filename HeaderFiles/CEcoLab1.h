@@ -23,6 +23,7 @@
 #include "IEcoLab1.h"
 #include "IEcoSystem1.h"
 #include "IdEcoMemoryManager1.h"
+#include "IdEcoComplex1.h"
 
 typedef struct CEcoLab1 {
 
@@ -35,6 +36,9 @@ typedef struct CEcoLab1 {
 
     /* Интерфейс для работы с памятью */
     IEcoMemoryAllocator1* m_pIMem;
+
+    /* Интерфейс для работы с памятью */
+    IEcoComplex1* m_pICmplx;
 
     /* Системный интерфейс */
     IEcoSystem1* m_pISys;

@@ -20,6 +20,7 @@
 #include "IEcoSystem1.h"
 #include "IEcoInterfaceBus1.h"
 #include "IEcoInterfaceBus1MemExt.h"
+#include "IEcoComplex1.h"
 #include "CEcoLab1.h"
 
 #define PI 3.14159265358979323846
@@ -115,92 +116,6 @@ uint32_t ECOCALLMETHOD CEcoLab1_Release(/* in */ struct IEcoLab1* me) {
 /*
  *
  * <сводка>
- *   Функция AddComplex
- * </сводка>
- *
- * <описание>
- *   Функция считает сумму комплексных чисел num1 и num2
- * </описание>
- *
- */
-complex_t CEcoLab1_AddComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t num1, /* int */ complex_t num2)
-{
-    CEcoLab1* pCMe = (CEcoLab1*)me;
-
-    return (complex_t) {.re = num1.re + num2.re, .im = num1.im + num2.im};
-}
-
-/*
- *
- * <сводка>
- *   Функция SubComplex
- * </сводка>
- *
- * <описание>
- *   Функция считает разность комплексных чисел num1 и num2
- * </описание>
- *
- */
-complex_t CEcoLab1_SubComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t num1, /* int */ complex_t num2)
-{
-    CEcoLab1* pCMe = (CEcoLab1*)me;
-
-    return (complex_t) {
-        .re = num1.re - num2.re,
-        .im = num1.im - num2.im
-    };
-}
-
-/*
- *
- * <сводка>
- *   Функция MultiplyComplex
- * </сводка>
- *
- * <описание>
- *   Функция считает произведение комплексных чисел num1 и num2
- * </описание>
- *
- */
-complex_t CEcoLab1_MultiplyComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t num1, /* int */ complex_t num2)
-{
-    CEcoLab1* pCMe = (CEcoLab1*)me;
-
-    return (complex_t) {
-      .re = (num1.re * num2.re) - (num1.im * num2.im),
-      .im = (num1.re * num2.im) + (num1.im * num2.re)
-    };
-}
-
-/*
- *
- * <сводка>
- *   Функция ExpComplex
- * </сводка>
- *
- * <описание>
- *   Функция экспоненту от комплексного числа num
- * </описание>
- *
- */
-complex_t CEcoLab1_ExpComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t num)
-{
-    CEcoLab1* pCMe = (CEcoLab1*)me;
-
-    complex_t res;
-    double r;
-    
-    r = exp(num.re);
-
-    return (complex_t) {
-        .re = r * cos(num.im),
-        .im = r * sin(num.im)
-    };
-}
-
-/*
- *
- * <сводка>
  *   Функция dft
  * </сводка>
  *
@@ -212,6 +127,11 @@ complex_t CEcoLab1_ExpComplex(/* in */ struct IEcoLab1* me, /* int */ complex_t 
 void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out)
 {
     CEcoLab1* pCMe = (CEcoLab1*)me;
+
+    /* Проверка указателей */
+    if (me == 0 ) {
+        return;
+    }
 
     /* Output array should be >= initial array */
     if (v_in == NULL || v_out == NULL) return;
@@ -228,21 +148,21 @@ void ECOCALLMETHOD CEcoLab1_dft(/* in */ struct IEcoLab1* me, /* in */ uint16_t 
         v_exp.re = 0;
         v_exp.im = (-1 * 2 * PI * j * i) / N;
 
-        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
-        v_exp = pCMe->m_pVTblIEcoLab1->ExpComplex((IEcoLab1*)pCMe, v_exp);
-        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
+        v_exp = pCMe->m_pICmplx->pVTbl->ExpComplex((IEcoComplex1*)pCMe, v_exp);
+        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
 
-        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
-        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
+        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
+        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
         
         /* tmp.re = 0;
         tmp.im = v_in[i]; */
         tmp.re = v_in[i];
         tmp.im = 0;
-        tmp = pCMe->m_pVTblIEcoLab1->MultiplyComplex((IEcoLab1*)pCMe, tmp, v_exp);
-        res_dft[j] = pCMe->m_pVTblIEcoLab1->AddComplex((IEcoLab1*)pCMe, res_dft[j], tmp);
-        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
-        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+        tmp = pCMe->m_pICmplx->pVTbl->MultiplyComplex((IEcoComplex1*)pCMe, tmp, v_exp);
+        res_dft[j] = pCMe->m_pICmplx->pVTbl->AddComplex((IEcoComplex1*)pCMe, res_dft[j], tmp);
+        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
+        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
       }
     }
 
@@ -295,33 +215,33 @@ void ECOCALLMETHOD CEcoLab1_fft(/* in */ IEcoLab1* me, /* in */ uint32_t stride,
         tmp.re = 0;
         tmp.im = 2 * PI * k / N;
 
-        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
-        tmp = pCMe->m_pVTblIEcoLab1->ExpComplex((IEcoLab1*)pCMe, tmp);
-        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
+        tmp = pCMe->m_pICmplx->pVTbl->ExpComplex((IEcoComplex1*)pCMe, tmp);
+        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
 
-        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
-        tmp = pCMe->m_pVTblIEcoLab1->MultiplyComplex((IEcoLab1*)pCMe, tmp, v_out[k + N/2]);
-        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
+        tmp = pCMe->m_pICmplx->pVTbl->MultiplyComplex((IEcoComplex1*)pCMe, tmp, v_out[k + N/2]);
+        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
 
-        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
-        v_out[k] = pCMe->m_pVTblIEcoLab1->AddComplex((IEcoLab1*)pCMe, t, tmp);
-        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
+        v_out[k] = pCMe->m_pICmplx->pVTbl->AddComplex((IEcoComplex1*)pCMe, t, tmp);
+        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
 
         /* Even numbers */
         tmp.re = 0;
         tmp.im = 2 * PI * k / N;
 
-        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
-        tmp = pCMe->m_pVTblIEcoLab1->ExpComplex((IEcoLab1*)pCMe, tmp);
-        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
+        tmp = pCMe->m_pICmplx->pVTbl->ExpComplex((IEcoComplex1*)pCMe, tmp);
+        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
 
-        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
-        tmp = pCMe->m_pVTblIEcoLab1->MultiplyComplex((IEcoLab1*)pCMe, tmp, v_out[k + N/2]);
-        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
+        tmp = pCMe->m_pICmplx->pVTbl->MultiplyComplex((IEcoComplex1*)pCMe, tmp, v_out[k + N/2]);
+        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
 
-        pCMe->m_pVTblIEcoLab1->AddRef((IEcoLab1*)pCMe);
-        v_out[k + N/2] = pCMe->m_pVTblIEcoLab1->SubComplex((IEcoLab1*)pCMe, t, tmp);
-        pCMe->m_pVTblIEcoLab1->Release((IEcoLab1*)pCMe);
+        pCMe->m_pICmplx->pVTbl->AddRef((IEcoComplex1*)pCMe);
+        v_out[k + N/2] = pCMe->m_pICmplx->pVTbl->SubComplex((IEcoComplex1*)pCMe, t, tmp);
+        pCMe->m_pICmplx->pVTbl->Release((IEcoComplex1*)pCMe);
     }
 }
 
@@ -373,10 +293,6 @@ IEcoLab1VTbl g_x277FC00C35624096AFCFC125B94EEC90VTbl = {
     CEcoLab1_QueryInterface,
     CEcoLab1_AddRef,
     CEcoLab1_Release,
-    CEcoLab1_AddComplex,
-    CEcoLab1_SubComplex,
-    CEcoLab1_MultiplyComplex,
-    CEcoLab1_ExpComplex,
     CEcoLab1_dft,
     CEcoLab1_fft
 };
@@ -401,9 +317,11 @@ int16_t ECOCALLMETHOD createCEcoLab1(/* in */ IEcoUnknown* pIUnkSystem, /* in */
     IEcoInterfaceBus1* pIBus = 0;
     IEcoInterfaceBus1MemExt* pIMemExt = 0;
     IEcoMemoryAllocator1* pIMem = 0;
+    IEcoComplex1* pICmplx = 0;
     CEcoLab1* pCMe = 0;
-    UGUID* rcid = (UGUID*)&CID_EcoMemoryManager1;
-	
+    UGUID* rcidMem = (UGUID*)&CID_EcoMemoryManager1;
+    UGUID* rcidCmplx = (UGUID*)&CID_EcoComplex1;
+
     /* Проверка указателей */
     if (ppIEcoLab1 == 0 || pIUnkSystem == 0) {
         return result;
@@ -423,15 +341,25 @@ int16_t ECOCALLMETHOD createCEcoLab1(/* in */ IEcoUnknown* pIUnkSystem, /* in */
 	/* Получение идентификатора компонента для работы с памятью */
     result = pIBus->pVTbl->QueryInterface(pIBus, &IID_IEcoInterfaceBus1MemExt, (void**)&pIMemExt);
     if (result == 0 && pIMemExt != 0) {
-        rcid = (UGUID*)pIMemExt->pVTbl->get_Manager(pIMemExt);
+        rcidMem = (UGUID*)pIMemExt->pVTbl->get_Manager(pIMemExt);
         pIMemExt->pVTbl->Release(pIMemExt);
     }
 
     /* Получение интерфейса распределителя памяти */
-    pIBus->pVTbl->QueryComponent(pIBus, rcid, 0, &IID_IEcoMemoryAllocator1, (void**) &pIMem);
+    pIBus->pVTbl->QueryComponent(pIBus, rcidMem, 0, &IID_IEcoMemoryAllocator1, (void**) &pIMem);
 
     /* Проверка */
     if (result != 0 && pIMem == 0) {
+        /* Освобождение системного интерфейса в случае ошибки */
+        pISys->pVTbl->Release(pISys);
+        return result;
+    }
+
+    /* Получение интерфейса для работы с комплексными числами */
+    pIBus->pVTbl->QueryComponent(pIBus, rcidCmplx, 0, &IID_IEcoComplex1, (void**) &pICmplx);
+
+    /* Проверка */
+    if (result != 0 && pICmplx == 0) {
         /* Освобождение системного интерфейса в случае ошибки */
         pISys->pVTbl->Release(pISys);
         return result;
@@ -445,6 +373,9 @@ int16_t ECOCALLMETHOD createCEcoLab1(/* in */ IEcoUnknown* pIUnkSystem, /* in */
 
     /* Сохранение указателя на интерфейс для работы с памятью */
     pCMe->m_pIMem = pIMem;
+
+    /* Сохранение указателя на интерфейс для работы комплексными числами */
+    pCMe->m_pICmplx = pICmplx;
 
     /* Установка счетчика ссылок на компонент */
     pCMe->m_cRef = 1;
@@ -478,6 +409,7 @@ int16_t ECOCALLMETHOD createCEcoLab1(/* in */ IEcoUnknown* pIUnkSystem, /* in */
 void ECOCALLMETHOD deleteCEcoLab1(/* in */ IEcoLab1* pIEcoLab1) {
     CEcoLab1* pCMe = (CEcoLab1*)pIEcoLab1;
     IEcoMemoryAllocator1* pIMem = 0;
+    IEcoComplex1* pICmplx = 0;
 
     if (pIEcoLab1 != 0 ) {
         pIMem = pCMe->m_pIMem;
@@ -490,5 +422,8 @@ void ECOCALLMETHOD deleteCEcoLab1(/* in */ IEcoLab1* pIEcoLab1) {
         }
         pIMem->pVTbl->Free(pIMem, pCMe);
         pIMem->pVTbl->Release(pIMem);
+
+        pICmplx = pCMe->m_pICmplx;
+        pICmplx->pVTbl->Release(pICmplx);
     }
 }
