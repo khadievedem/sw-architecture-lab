@@ -23,12 +23,12 @@
 #include "CEcoLab2.h"
 #include "IEcoCalculatorX.h"
 #include "IEcoCalculatorY.h"
+#include "IdEcoLab1.h"
 #include "IdEcoCalculatorA.h"
 #include "IdEcoCalculatorB.h"
 #include "IdEcoCalculatorC.h"
 #include "IdEcoCalculatorD.h"
 #include "IdEcoCalculatorE.h"
-#include <stdio.h>
 
 /*
  *
@@ -229,7 +229,7 @@ int32_t ECOCALLMETHOD CEcoLab2_Division(/* in */ struct IEcoLab2* me, /* in */ i
     return result;
 }
 
-void ECOCALLMETHOD CEcoLab2_fft(/* in */ struct IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint32_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out) {
+void ECOCALLMETHOD CEcoLab2_fft(/* in */ struct IEcoLab2* me, /* in */ uint32_t stride, /* in */ uint32_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out) {
     CEcoLab2* pCMe = (CEcoLab2*)me;
 
     /* Проверка указателей */
@@ -240,7 +240,7 @@ void ECOCALLMETHOD CEcoLab2_fft(/* in */ struct IEcoLab1* me, /* in */ uint32_t 
 
     /* Проверка указателя включаемого компонента и вызов метода */
     if (pCMe->m_pILab1 != 0) {
-        pCMe->m_pILab1->pVTbl->fft(pCMe->m_pILab1, stride, N, v_in, v_out))
+        pCMe->m_pILab1->pVTbl->fft(pCMe->m_pILab1, stride, N, v_in, v_out);
     }
 }
 /*

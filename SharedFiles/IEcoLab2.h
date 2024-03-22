@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __I_ECOLAB1_H__
-#define __I_ECOLAB1_H__
+#ifndef __I_ECOLAB2_H__
+#define __I_ECOLAB2_H__
 
 #include "IEcoBase1.h"
 #include "IEcoComplex1.h"
@@ -44,7 +44,7 @@ typedef struct IEcoLab2VTbl {
     int32_t (ECOCALLMETHOD *Subtraction)(/* in */ struct IEcoLab2* me, /* in */ int32_t a, /* in */ int32_t b);
     int32_t (ECOCALLMETHOD *Multiplication)(/* in */ struct IEcoLab2* me, /* in */ int32_t a, /* in */ int32_t b);
     int32_t (ECOCALLMETHOD *Division)(/* in */ struct IEcoLab2* me, /* in */ int32_t a, /* in */ int32_t b);
-    void    (ECOCALLMETHOD *fft)(/* in */ struct IEcoLab1* me, /* in */ uint32_t stride, /* in */ uint32_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out);
+    void    (ECOCALLMETHOD *fft)(/* in */ struct IEcoLab2* me, /* in */ uint32_t stride, /* in */ uint32_t N, /* in */ int32_t *v_in, /* out */ complex_t *v_out);
 
 } IEcoLab2VTbl, *IEcoLab2VTblPtr;
 
@@ -53,4 +53,4 @@ interface IEcoLab2 {
 } IEcoLab2;
 
 
-#endif /* __I_ECOLAB1_H__ */
+#endif /* __I_ECOLAB2_H__ */

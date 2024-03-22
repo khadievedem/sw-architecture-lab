@@ -60,4 +60,4 @@ int16_t ECOCALLMETHOD createCEcoLab2(/* in */ IEcoUnknown* pIUnkSystem, /* in */
 /* Удаление */
 void ECOCALLMETHOD deleteCEcoLab2(/* in */ IEcoLab2* pIEcoLab2);
 
-#endif /* __C_ECOLAB1_H__ */
+#endif /* __C_ECOLAB2_H__ */

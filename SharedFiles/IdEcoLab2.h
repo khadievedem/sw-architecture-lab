@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef __ID_ECOLAB1_H__
-#define __ID_ECOLAB1_H__
+#ifndef __ID_ECOLAB2_H__
+#define __ID_ECOLAB2_H__
 
 #include "IEcoBase1.h"
 #include "IEcoLab2.h"
@@ -39,4 +39,4 @@ ECO_EXPORT IEcoComponentFactory* ECOCALLMETHOD GetIEcoComponentFactoryPtr();
 extern IEcoComponentFactory* GetIEcoComponentFactoryPtr_1F5DF16EE1BF43B999A434ED38FEFFF2;
 #endif
 
-#endif /* __ID_ECOLAB1_H__ */
+#endif /* __ID_ECOLAB2_H__ */
