@@ -1,5 +1,5 @@
 ﻿ifeq ($(TARGET), 1)
-OUT_TARGET = EcoLab1
+OUT_TARGET = EcoLab2
 ifeq ($(DEBUG), 1)
 CONFIG_TARGET = StaticDebug
 CCFLAGS_TARGET = -Wall -O3 -g -DECO_LIB
@@ -10,7 +10,7 @@ CCFLAGS_TARGET = -O3 -DECO_LIB
 LDFLAGS_TARGET =
 endif
 else
-OUT_TARGET = EcoLab1
+OUT_TARGET = EcoLab2
 ifeq ($(DEBUG), 1)
 CONFIG_TARGET = DynamicDebug
 CCFLAGS_TARGET = -Wall -O3 -g -DECO_DLL
@@ -24,7 +24,7 @@ endif
 
 # source files.
 SRC = \
-../../../UnitTestFiles/SourceFiles/EcoLab1.c
+../../../UnitTestFiles/SourceFiles/EcoLab2.c
 
 
 # include directories
@@ -41,6 +41,12 @@ INCLUDES = \
 # libraries directories
 LIB_DIR = \
 -L ../../../BuildFiles/Linux/x64/$(CONFIG_TARGET) \
+-L ../../../BuildFiles/Lesson02/Eco.CalculatorA/BuildFiles/Linux/x64/$(CONFIG_TARGET) \
+-L ../../../BuildFiles/Lesson03/Eco.CalculatorB/BuildFiles/Linux/x64/$(CONFIG_TARGET) \
+-L ../../../BuildFiles/Lesson06/Eco.CalculatorD//BuildFiles/Linux/x64/$(CONFIG_TARGET) \
+-L ../../../BuildFiles/Lesson07/Eco.CalculatorE/BuildFiles/Linux/x64/$(CONFIG_TARGET) \
+-L ../../../BuildFiles/Lesson05/Eco.CalculatorC/BuildFiles/Linux/x64/StaticRelease \
+-L ../../../BuildFiles/EcoLab1/StaticRelease \
 -L $(ECO_FRAMEWORK)/Eco.InterfaceBus1/BuildFiles/Linux/x64/StaticRelease \
 -L $(ECO_FRAMEWORK)/Eco.FileSystemManagement1/BuildFiles/Linux/x64/StaticRelease \
 -L $(ECO_FRAMEWORK)/Eco.MemoryManager1/BuildFiles/Linux/x64/StaticRelease \
@@ -61,7 +67,7 @@ CC = gcc
 AR = gcc-ar
 
 ifeq ($(TARGET), 1)
-LIBS_TARGET=-l1F5DF16EE1BF43B999A434ED38FE8F3A -l1F5DF16EE1BF43B999A434ED38FFFFFF
+LIBS_TARGET=-l1F5DF16EE1BF43B999A434ED38FE8F3A -l1F5DF16EE1BF43B999A434ED38FFFFFF -l4828F6552E4540E78121EBD220DC360E -l1F5DF16EE1BF43B999A434ED38FEFFF2
 else
 LIBS_TARGET=
 endif
