@@ -21,8 +21,8 @@
 #include "IEcoInterfaceBus1.h"
 #include "IEcoInterfaceBus1MemExt.h"
 #include "CEcoComplex1.h"
+#include <math.h>
 
-#define PI 3.14159265358979323846
 
 /*
  *

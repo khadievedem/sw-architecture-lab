@@ -1,5 +1,5 @@
 ﻿ifeq ($(TARGET), 1)
-OUT_TARGET = EcoLab1
+OUT_TARGET = EcoLab3
 ifeq ($(DEBUG), 1)
 CONFIG_TARGET = StaticDebug
 CCFLAGS_TARGET = -Wall -O3 -g -DECO_LIB
@@ -10,7 +10,7 @@ CCFLAGS_TARGET = -O3 -DECO_LIB
 LDFLAGS_TARGET =
 endif
 else
-OUT_TARGET = EcoLab1
+OUT_TARGET = EcoLab3
 ifeq ($(DEBUG), 1)
 CONFIG_TARGET = DynamicDebug
 CCFLAGS_TARGET = -Wall -O3 -g -DECO_DLL
@@ -24,8 +24,8 @@ endif
 
 # source files.
 SRC = \
-../../../UnitTestFiles/SourceFiles/EcoLab1.c
-
+../../../UnitTestFiles/SourceFiles/CEcoLab3Sink.c \
+../../../UnitTestFiles/SourceFiles/EcoLab3.c
 
 # include directories
 INCLUDES = \
@@ -34,8 +34,8 @@ INCLUDES = \
 -I ../../../UnitTestFiles/HeaderFiles \
 -I $(ECO_FRAMEWORK)/Eco.Core1/SharedFiles \
 -I $(ECO_FRAMEWORK)/Eco.InterfaceBus1/SharedFiles \
+-I $(ECO_FRAMEWORK)/Eco.List1/SharedFiles \
 -I $(ECO_FRAMEWORK)/Eco.FileSystemManagement1/SharedFiles \
--I $(ECO_FRAMEWORK)/Eco.DateTime1/SharedFiles \
 -I $(ECO_FRAMEWORK)/Eco.MemoryManager1/SharedFiles
 
 # libraries directories
@@ -43,9 +43,9 @@ LIB_DIR = \
 -L ../../../BuildFiles/Linux/x64/$(CONFIG_TARGET) \
 -L $(ECO_FRAMEWORK)/Eco.InterfaceBus1/BuildFiles/Linux/x64/StaticRelease \
 -L $(ECO_FRAMEWORK)/Eco.FileSystemManagement1/BuildFiles/Linux/x64/StaticRelease \
+-L $(ECO_FRAMEWORK)/Eco.List1/BuildFiles/Linux/x64/StaticRelease \
 -L $(ECO_FRAMEWORK)/Eco.MemoryManager1/BuildFiles/Linux/x64/StaticRelease \
--L $(ECO_FRAMEWORK)/Eco.System1/BuildFiles/Linux/x64/StaticRelease \
--L $(ECO_FRAMEWORK)/Eco.DateTime1/BuildFiles/Linux/x64/StaticRelease
+-L $(ECO_FRAMEWORK)/Eco.System1/BuildFiles/Linux/x64/StaticRelease
 
 OBJ = $(SRC:.c=.o)
 
@@ -61,13 +61,13 @@ CC = gcc
 AR = gcc-ar
 
 ifeq ($(TARGET), 1)
-LIBS_TARGET=-l1F5DF16EE1BF43B999A434ED38FE8F3A -l1F5DF16EE1BF43B999A434ED38FFFFFF
+LIBS_TARGET=-l1F5DF16EE1BF43B999A434ED38FE8F3A -l53884AFC93C448ECAA929C8D3A562281 -l1F5DF16EE1BF43B999A434ED38FFFFFF
 else
 LIBS_TARGET=
 endif
 
 # library paths
-LIBS = $(LIB_DIR) -lX11 -lm -lc -lgcc -ldl -l00000000000000000000000000000100 -l00000000000000000000000042757331 -l0000000000000000000000004D656D31 -l00000000000000000000000046534D31 -l5B2BA17BEA704527BC708F88568FE115 $(LIBS_TARGET) -lGL -LGLX
+LIBS = $(LIB_DIR) -lX11 -lm -lc -lgcc -ldl -l00000000000000000000000000000100 -l00000000000000000000000042757331 -l0000000000000000000000004D656D31 -l00000000000000000000000046534D31 $(LIBS_TARGET) -lGL -LGLX
 
 # compile flags
 LDFLAGS = $(LDFLAGS_TARGET) $(LIBS)

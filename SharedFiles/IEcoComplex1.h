@@ -25,7 +25,8 @@
 #define __I_ECOCOMPLEX1_H__
 
 #include "IEcoBase1.h"
-#include <math.h>
+
+#define PI 3.14159265358979323846
 
 typedef struct complexType {
     double re;
