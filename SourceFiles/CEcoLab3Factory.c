@@ -4,7 +4,7 @@
  * </кодировка символов>
  *
  * <сводка>
- *   CEcoLab1Factory
+ *   CEcoLab3Factory
  * </сводка>
  *
  * <описание>
@@ -17,8 +17,8 @@
  *
  */
 
-#include "CEcoLab1.h"
-#include "CEcoLab1Factory.h"
+#include "CEcoLab3.h"
+#include "CEcoLab3Factory.h"
 
 /*
  *
@@ -31,7 +31,7 @@
  * </описание>
  *
  */
-int16_t ECOCALLMETHOD CEcoLab1Factory_QueryInterface(IEcoComponentFactory* me, const UGUID* riid, void** ppv) {
+int16_t ECOCALLMETHOD CEcoLab3Factory_QueryInterface(IEcoComponentFactory* me, const UGUID* riid, void** ppv) {
     if ( IsEqualUGUID(riid, &IID_IEcoUnknown) || IsEqualUGUID(riid, &IID_IEcoComponentFactory) ) {
         *ppv = me;
     }
@@ -55,8 +55,8 @@ int16_t ECOCALLMETHOD CEcoLab1Factory_QueryInterface(IEcoComponentFactory* me, c
  * </описание>
  *
  */
-uint32_t ECOCALLMETHOD CEcoLab1Factory_AddRef(/* in */ IEcoComponentFactory* me) {
-    CEcoLab1Factory* pCMe = (CEcoLab1Factory*)me;
+uint32_t ECOCALLMETHOD CEcoLab3Factory_AddRef(/* in */ IEcoComponentFactory* me) {
+    CEcoLab3Factory* pCMe = (CEcoLab3Factory*)me;
 
     if (me == 0 ) {
         return -1;
@@ -76,8 +76,8 @@ uint32_t ECOCALLMETHOD CEcoLab1Factory_AddRef(/* in */ IEcoComponentFactory* me)
  * </описание>
  *
  */
-uint32_t ECOCALLMETHOD CEcoLab1Factory_Release(/* in */ IEcoComponentFactory* me) {
-    CEcoLab1Factory* pCMe = (CEcoLab1Factory*)me;
+uint32_t ECOCALLMETHOD CEcoLab3Factory_Release(/* in */ IEcoComponentFactory* me) {
+    CEcoLab3Factory* pCMe = (CEcoLab3Factory*)me;
 
     if (me == 0 ) {
         return -1;
@@ -88,7 +88,7 @@ uint32_t ECOCALLMETHOD CEcoLab1Factory_Release(/* in */ IEcoComponentFactory* me
 
     /* В случае обнуления счетчика, освобождение данных экземпляра */
     if ( pCMe->m_cRef == 0 ) {
-        //deleteCEcoLab1Factory(&pCMe->m_VtblICF);
+        //deleteCEcoLab3Factory(&pCMe->m_VtblICF);
         return 0;
     }
     return pCMe->m_cRef;
@@ -105,8 +105,8 @@ uint32_t ECOCALLMETHOD CEcoLab1Factory_Release(/* in */ IEcoComponentFactory* me
  * </описание>
  *
  */
-int16_t ECOCALLMETHOD CEcoLab1Factory_Init(/* in */ struct IEcoComponentFactory* me, /* in */ struct IEcoUnknown *pIUnkSystem, /* in */ void* pv) {
-    CEcoLab1Factory* pCMe = (CEcoLab1Factory*)me;
+int16_t ECOCALLMETHOD CEcoLab3Factory_Init(/* in */ struct IEcoComponentFactory* me, /* in */ struct IEcoUnknown *pIUnkSystem, /* in */ void* pv) {
+    CEcoLab3Factory* pCMe = (CEcoLab3Factory*)me;
     int16_t result = -1;
 
     if (me == 0 ) {
@@ -130,8 +130,8 @@ int16_t ECOCALLMETHOD CEcoLab1Factory_Init(/* in */ struct IEcoComponentFactory*
  * </описание>
  *
  */
-int16_t ECOCALLMETHOD CEcoLab1Factory_Alloc(/* in */ struct IEcoComponentFactory* me, /* in */ struct IEcoUnknown *pISystem, /* in */ struct IEcoUnknown *pIUnknownOuter, /* in */ const UGUID* riid, /* out */ void** ppv) {
-    CEcoLab1Factory* pCMe = (CEcoLab1Factory*)me;
+int16_t ECOCALLMETHOD CEcoLab3Factory_Alloc(/* in */ struct IEcoComponentFactory* me, /* in */ struct IEcoUnknown *pISystem, /* in */ struct IEcoUnknown *pIUnknownOuter, /* in */ const UGUID* riid, /* out */ void** ppv) {
+    CEcoLab3Factory* pCMe = (CEcoLab3Factory*)me;
     IEcoUnknown* pIUnk = 0;
     int16_t result = -1;
 
@@ -174,8 +174,8 @@ int16_t ECOCALLMETHOD CEcoLab1Factory_Alloc(/* in */ struct IEcoComponentFactory
  * </описание>
  *
  */
-char_t* ECOCALLMETHOD CEcoLab1Factory_get_Name(/* in */ struct IEcoComponentFactory* me) {
-    CEcoLab1Factory* pCMe = (CEcoLab1Factory*)me;
+char_t* ECOCALLMETHOD CEcoLab3Factory_get_Name(/* in */ struct IEcoComponentFactory* me) {
+    CEcoLab3Factory* pCMe = (CEcoLab3Factory*)me;
 
     if (me == 0 ) {
         return 0;
@@ -195,8 +195,8 @@ char_t* ECOCALLMETHOD CEcoLab1Factory_get_Name(/* in */ struct IEcoComponentFact
  * </описание>
  *
  */
-char_t* ECOCALLMETHOD CEcoLab1Factory_get_Version(/* in */ struct IEcoComponentFactory* me) {
-    CEcoLab1Factory* pCMe = (CEcoLab1Factory*)me;
+char_t* ECOCALLMETHOD CEcoLab3Factory_get_Version(/* in */ struct IEcoComponentFactory* me) {
+    CEcoLab3Factory* pCMe = (CEcoLab3Factory*)me;
 
     if (me == 0 ) {
         return 0;
@@ -216,8 +216,8 @@ char_t* ECOCALLMETHOD CEcoLab1Factory_get_Version(/* in */ struct IEcoComponentF
  * </описание>
  *
  */
-char_t* ECOCALLMETHOD CEcoLab1Factory_get_Manufacturer(/* in */ struct IEcoComponentFactory* me) {
-    CEcoLab1Factory* pCMe = (CEcoLab1Factory*)me;
+char_t* ECOCALLMETHOD CEcoLab3Factory_get_Manufacturer(/* in */ struct IEcoComponentFactory* me) {
+    CEcoLab3Factory* pCMe = (CEcoLab3Factory*)me;
 
     if (me == 0 ) {
         return 0;
@@ -228,14 +228,14 @@ char_t* ECOCALLMETHOD CEcoLab1Factory_get_Manufacturer(/* in */ struct IEcoCompo
 
 /* Create Virtual Table */
 IEcoComponentFactoryVTbl g_x1F5DF16EE1BF43B999A434ED38FE8F3AFactoryVTbl = {
-    CEcoLab1Factory_QueryInterface,
-    CEcoLab1Factory_AddRef,
-    CEcoLab1Factory_Release,
-    CEcoLab1Factory_Alloc,
-    CEcoLab1Factory_Init,
-    CEcoLab1Factory_get_Name,
-    CEcoLab1Factory_get_Version,
-    CEcoLab1Factory_get_Manufacturer
+    CEcoLab3Factory_QueryInterface,
+    CEcoLab3Factory_AddRef,
+    CEcoLab3Factory_Release,
+    CEcoLab3Factory_Alloc,
+    CEcoLab3Factory_Init,
+    CEcoLab3Factory_get_Name,
+    CEcoLab3Factory_get_Version,
+    CEcoLab3Factory_get_Manufacturer
 };
 
 /*
@@ -249,12 +249,12 @@ IEcoComponentFactoryVTbl g_x1F5DF16EE1BF43B999A434ED38FE8F3AFactoryVTbl = {
  * </описание>
  *
  */
-CEcoLab1Factory g_x1F5DF16EE1BF43B999A434ED38FE8F3AFactory = {
+CEcoLab3Factory g_x1F5DF16EE1BF43B999A434ED38FE8F3AFactory = {
     &g_x1F5DF16EE1BF43B999A434ED38FE8F3AFactoryVTbl,
     0,
-    (CreateInstance)createCEcoLab1,
-    (InitInstance)initCEcoLab1,
-    "EcoLab1\0",
+    (CreateInstance)createCEcoLab3,
+    (InitInstance)initCEcoLab3,
+    "EcoLab3\0",
     "1.0.0.0\0",
     "CompanyName\0"
 };

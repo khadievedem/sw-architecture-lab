@@ -4,11 +4,11 @@
  * </кодировка символов>
  *
  * <сводка>
- *   IdEcoLab1
+ *   IdEcoLab3
  * </сводка>
  *
  * <описание>
- *   Данный заголовок описывает интерфейс IdEcoLab1
+ *   Данный заголовок описывает интерфейс IdEcoLab3
  * </описание>
  *
  * <ссылка>
@@ -25,12 +25,12 @@
 #define __ID_ECOLAB1_H__
 
 #include "IEcoBase1.h"
-#include "IEcoLab1.h"
+#include "IEcoLab3.h"
 
-/* EcoLab1 CID = {1F5DF16E-E1BF-43B9-99A4-34ED38FE8F3A} */
-#ifndef __CID_EcoLab1
-static const UGUID CID_EcoLab1 = {0x01, 0x10, 0x1F, 0x5D, 0xF1, 0x6E, 0xE1, 0xBF, 0x43, 0xB9, 0x99, 0xA4, 0x34, 0xED, 0x38, 0xFE, 0x8F, 0x3A};
-#endif /* __CID_EcoLab1 */
+/* EcoLab3 CID = {1F5DF16E-E1BF-43B9-99A4-34ED38FE8F3A} */
+#ifndef __CID_EcoLab3
+static const UGUID CID_EcoLab3 = {0x01, 0x10, 0x1F, 0x5D, 0xF1, 0x6E, 0xE1, 0xBF, 0x43, 0xB9, 0x99, 0xA4, 0x34, 0xED, 0x38, 0xFE, 0x8F, 0x3A};
+#endif /* __CID_EcoLab3 */
 
 /* Фабрика компонента для динамической и статической компановки */
 #ifdef ECO_DLL
