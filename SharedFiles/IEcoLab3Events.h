@@ -41,7 +41,9 @@ typedef struct IEcoLab3VTblEvents {
     uint32_t (ECOCALLMETHOD *Release )(/* in */ struct IEcoLab3Events* me);
 
     /* IEcoLab3Events */
-    int16_t (ECOCALLMETHOD *OnFFTCallback)(/* in */ struct IEcoLab3Events* me, /* in */ uint32_t N, /* in */ const complex_t* const vec, char_t side);
+    int16_t (ECOCALLMETHOD *OnLeftSubtreeFFTCallback)(/* in */ struct IEcoLab3Events* me, /* in */ uint32_t N, /* in */ const complex_t* const vec);
+    int16_t (ECOCALLMETHOD *OnRightSubtreeFFTCallback)(/* in */ struct IEcoLab3Events* me, /* in */ uint32_t N, /* in */ const complex_t* const vec);
+    int16_t (ECOCALLMETHOD *OnEndFFTCallback)(/* in */ struct IEcoLab3Events* me, /* in */ uint32_t N, /* in */ const complex_t* const vec);
 
 } IEcoLab3VTblEvents, *IEcoLab3VTblEventsPtr;
 

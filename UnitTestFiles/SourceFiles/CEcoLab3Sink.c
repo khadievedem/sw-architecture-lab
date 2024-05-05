@@ -100,37 +100,14 @@ uint32_t ECOCALLMETHOD CEcoLab3Sink_Release(/* in */ struct IEcoLab3Events* me) 
     return pCMe->m_cRef;
 }
 
-/*
- *
- * <сводка>
- *   Функция OnFFTCallback
- * </сводка>
- *
- * <описание>
- *   Функция обратного вызова
- * </описание>
- *
- */
-int16_t ECOCALLMETHOD CEcoLab3Sink_OnFFTCallback(/* in */ struct IEcoLab3Events* me, /* in */ uint32_t N, /* in */ const complex_t * const vec, char_t side) {
+int16_t ECOCALLMETHOD CEcoLab3Sink_OnLeftSubtreeFFTCallback(/* in */ struct IEcoLab3Events* me, /* in */ uint32_t N, /* in */ const complex_t* const vec) {
     CEcoLab3Sink* pCMe = (CEcoLab3Sink*)me;
-    static uint32_t prevSize = 0;
     uint32_t i;
     
-    if (vec == NULL && side == '\0') {
-        printf("\n\033[22;33m↑");
-        printf("\n└────Result. End up with FFT algorithm\033[0m\n");
-        return 0;        
-    }
-
-    if (!N) return 0;
+    if (vec == NULL || N == 0 || me == 0) return -1;
     
-    printf("%*s\r", prevSize * 20, "");;
-    printf("\033[22;32m");
-    if (side == 'l') {
-        printf("LEFT  SUBTREE: ");
-    } else if (side == 'r') {
-        printf("RIGHT SUBTREE: ");
-    }
+    printf("\033[22;32mLEFT  SUBTREE: ");
+
     for (i = 0; i < N; ++i) {
         printf("%.2f + %.2fi", vec[i].re, vec[i].im);
         if (i != N - 1) printf(" + ");
@@ -139,18 +116,50 @@ int16_t ECOCALLMETHOD CEcoLab3Sink_OnFFTCallback(/* in */ struct IEcoLab3Events*
 
     putc('\r', stdout);
     fflush(stdout);
-    /* putc('\n', stdout); */
 
-    if (me == 0 ) {
-        return -1;
-    }
-    
-    sleep(2);
-    prevSize = N;
+    sleep(1);
 
     return 0;
 }
 
+int16_t ECOCALLMETHOD CEcoLab3Sink_OnRightSubtreeFFTCallback(/* in */ struct IEcoLab3Events* me, /* in */ uint32_t N, /* in */ const complex_t* const vec) {
+    CEcoLab3Sink* pCMe = (CEcoLab3Sink*)me;
+    uint32_t i;
+    
+    if (vec == NULL || N == 0 || me == 0) return -1;
+    
+    printf("\033[22;32mRIGHT SUBTREE: ");
+    for (i = 0; i < N; ++i) {
+        printf("%.2f + %.2fi", vec[i].re, vec[i].im);
+        if (i != N - 1) printf(" + ");
+    }
+    printf("\033[0m");
+
+    putc('\r', stdout);
+    fflush(stdout);
+
+    sleep(1);
+    return 0;
+}
+
+int16_t ECOCALLMETHOD CEcoLab3Sink_OnEndFFTCallback(/* in */ struct IEcoLab3Events* me, /* in */ uint32_t N, /* in */ const complex_t* const vec) {
+    CEcoLab3Sink* pCMe = (CEcoLab3Sink*)me;
+    uint32_t i = 0;
+
+    if (!N) return -1;
+    
+    printf("\033[22;32m");
+    for (i = 0; i < N; ++i) {
+        printf("%.2f + %.2fi", vec[i].re, vec[i].im);
+        if (i != N - 1) printf(" + ");
+    }
+    putc('\r', stdout);
+    fflush(stdout);
+
+    printf("\n\033[22;33m↑");
+    printf("\n└────Result. End up with FFT algorithm\033[0m\n");
+    return 0;
+}
 
 /*
  *
@@ -222,7 +231,9 @@ IEcoLab3VTblEvents g_x2D2E3B9214F248A6A09ECB494B59C795VTblEvents = {
     CEcoLab3Sink_QueryInterface,
     CEcoLab3Sink_AddRef,
     CEcoLab3Sink_Release,
-    CEcoLab3Sink_OnFFTCallback
+    CEcoLab3Sink_OnLeftSubtreeFFTCallback,
+    CEcoLab3Sink_OnRightSubtreeFFTCallback,
+    CEcoLab3Sink_OnEndFFTCallback
 };
 
 /*

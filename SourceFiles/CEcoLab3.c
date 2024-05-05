@@ -24,6 +24,7 @@
 #include "CEcoLab3.h"
 #include "CEcoLab3EnumConnectionPoints.h"
 #include "IEcoConnectionPointContainer.h"
+#include <stdio.h>
 
 /*
  *
@@ -127,7 +128,7 @@ uint32_t ECOCALLMETHOD CEcoLab3_Release(/* in */ struct IEcoLab3* me) {
  * </описание>
  *
  */
-int16_t ECOCALLMETHOD CEcoLab3_Fire_OnFFTCallback(/* in */ struct IEcoLab3* me, /* in */ uint32_t N, /* out */ const complex_t* const vec, char_t side) {
+int16_t ECOCALLMETHOD CEcoLab3_Fire_OnLeftSubtreeFFTCallback(/* in */ struct IEcoLab3* me, /* in */ uint32_t N, /* out */ const complex_t* const vec) {
     CEcoLab3* pCMe = (CEcoLab3*)me;
     int16_t result = 0;
     uint32_t count = 0;
@@ -146,7 +147,89 @@ int16_t ECOCALLMETHOD CEcoLab3_Fire_OnFFTCallback(/* in */ struct IEcoLab3* me, 
             while (pEnum->pVTbl->Next(pEnum, 1, &cd, 0) == 0) {
                 result = cd.pUnk->pVTbl->QueryInterface(cd.pUnk, &IID_IEcoLab3Events, (void**)&pIEvents);
                 if ( (result == 0) && (pIEvents != 0) ) {
-                    result = pIEvents->pVTbl->OnFFTCallback(pIEvents, N, vec, side);
+                    result = pIEvents->pVTbl->OnLeftSubtreeFFTCallback(pIEvents, N, vec);
+                    pIEvents->pVTbl->Release(pIEvents);
+                }
+                cd.pUnk->pVTbl->Release(cd.pUnk);
+            }
+            pEnum->pVTbl->Release(pEnum);
+        }
+    }
+    return result;
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция Fire_OnFFTCallback
+ * </сводка>
+ *
+ * <описание>
+ *   Функция вызова обратного интерфейса
+ * </описание>
+ *
+ */
+int16_t ECOCALLMETHOD CEcoLab3_Fire_OnRightSubtreeFFTCallback(/* in */ struct IEcoLab3* me, /* in */ uint32_t N, /* out */ const complex_t* const vec) {
+    CEcoLab3* pCMe = (CEcoLab3*)me;
+    int16_t result = 0;
+    uint32_t count = 0;
+    uint32_t index = 0;
+    IEcoEnumConnections* pEnum = 0;
+    IEcoLab3Events* pIEvents = 0;
+    EcoConnectionData cd;
+
+    if (me == 0 ) {
+        return -1;
+    }
+
+    if (pCMe->m_pISinkCP != 0) {
+        result = ((IEcoConnectionPoint*)pCMe->m_pISinkCP)->pVTbl->EnumConnections((IEcoConnectionPoint*)pCMe->m_pISinkCP, &pEnum);
+        if ( (result == 0) && (pEnum != 0) ) {
+            while (pEnum->pVTbl->Next(pEnum, 1, &cd, 0) == 0) {
+                result = cd.pUnk->pVTbl->QueryInterface(cd.pUnk, &IID_IEcoLab3Events, (void**)&pIEvents);
+                if ( (result == 0) && (pIEvents != 0) ) {
+                    result = pIEvents->pVTbl->OnRightSubtreeFFTCallback(pIEvents, N, vec);
+                    pIEvents->pVTbl->Release(pIEvents);
+                }
+                cd.pUnk->pVTbl->Release(cd.pUnk);
+            }
+            pEnum->pVTbl->Release(pEnum);
+        }
+    }
+    return result;
+}
+
+/*
+ *
+ * <сводка>
+ *   Функция Fire_OnFFTCallback
+ * </сводка>
+ *
+ * <описание>
+ *   Функция вызова обратного интерфейса
+ * </описание>
+ *
+ */
+int16_t ECOCALLMETHOD CEcoLab3_Fire_OnEndFFTCallback(/* in */ struct IEcoLab3* me, /* in */ uint32_t N, /* out */ const complex_t* const vec) {
+    CEcoLab3* pCMe = (CEcoLab3*)me;
+    int16_t result = 0;
+    uint32_t count = 0;
+    uint32_t index = 0;
+    IEcoEnumConnections* pEnum = 0;
+    IEcoLab3Events* pIEvents = 0;
+    EcoConnectionData cd;
+
+    if (me == 0 ) {
+        return -1;
+    }
+
+    if (pCMe->m_pISinkCP != 0) {
+        result = ((IEcoConnectionPoint*)pCMe->m_pISinkCP)->pVTbl->EnumConnections((IEcoConnectionPoint*)pCMe->m_pISinkCP, &pEnum);
+        if ( (result == 0) && (pEnum != 0) ) {
+            while (pEnum->pVTbl->Next(pEnum, 1, &cd, 0) == 0) {
+                result = cd.pUnk->pVTbl->QueryInterface(cd.pUnk, &IID_IEcoLab3Events, (void**)&pIEvents);
+                if ( (result == 0) && (pIEvents != 0) ) {
+                    result = pIEvents->pVTbl->OnEndFFTCallback(pIEvents, N, vec);
                     pIEvents->pVTbl->Release(pIEvents);
                 }
                 cd.pUnk->pVTbl->Release(cd.pUnk);
@@ -203,7 +286,11 @@ void fft_(/* in */ IEcoLab3* me, /* in */ uint32_t stride, /* in */ uint32_t N, 
         tmp = pCMe->m_pICmplx->pVTbl->MultiplyComplex((IEcoComplex1*)pCMe, tmp, v_out[k + N/2]);
         v_out[k + N/2] = pCMe->m_pICmplx->pVTbl->SubComplex((IEcoComplex1*)pCMe, t, tmp);
     }
-    CEcoLab3_Fire_OnFFTCallback(me, N, v_out, side);
+
+    if (side == 'l')
+        CEcoLab3_Fire_OnLeftSubtreeFFTCallback(me, N, v_out);
+    else if (side == 'r')
+        CEcoLab3_Fire_OnRightSubtreeFFTCallback(me, N, v_out);
 }
 /*
  *
@@ -219,9 +306,10 @@ void fft_(/* in */ IEcoLab3* me, /* in */ uint32_t stride, /* in */ uint32_t N, 
 void ECOCALLMETHOD CEcoLab3_fft(/* in */ IEcoLab3* me, /* in */ uint32_t N, /* in */ const int32_t * const v_in, /* out */ complex_t *v_out)
 {
     printf("Start counting FFT:\n");
-    sleep(2);
+    sleep(1);
     fft_((IEcoLab3*)me, 1, N, v_in, v_out, 'n');
-    CEcoLab3_Fire_OnFFTCallback(me, N, NULL, '\0');
+
+    CEcoLab3_Fire_OnEndFFTCallback(me, N, v_out);
 }
 
 /*
