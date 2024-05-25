@@ -4,11 +4,11 @@
  * </кодировка символов>
  *
  * <сводка>
- *   IdEcoComplex1
+ *   IdEcoMutex1Lab
  * </сводка>
  *
  * <описание>
- *   Данный заголовок описывает интерфейс IdEcoComplex1
+ *   Данный заголовок описывает интерфейс IdEcoMutex1Lab
  * </описание>
  *
  * <ссылка>
@@ -21,22 +21,22 @@
  *
  */
 
-#ifndef __ID_ECOCOMPLEX1_H__
-#define __ID_ECOCOMPLEX1_H__
+#ifndef __ID_ECO_MUTEX_1_LAB_H__
+#define __ID_ECO_MUTEX_1_LAB_H__
 
 #include "IEcoBase1.h"
-#include "IEcoComplex1.h"
+#include "IEcoMutex1.h"
 
-/* EcoComplex1 CID = {1F5DF16E-E1BF-43B9-99A4-34ED38FFFFFF} */
-#ifndef __CID_EcoComplex1
-static const UGUID CID_EcoComplex1 = {0x01, 0x10, 0x1F, 0x5D, 0xF1, 0x6E, 0xE1, 0xBF, 0x43, 0xB9, 0x99, 0xA4, 0x34, 0xED, 0x38, 0xFF, 0xFF, 0xFF};
-#endif /* __CID_EcoComplex1 */
+/* EcoMutex1Lab CID = {2F48BBCB-E488-4CC0-8ECF-C45990017215} */
+#ifndef __CID_EcoMutex1Lab
+static const UGUID CID_EcoMutex1Lab = {0x01, 0x10, {0x2F, 0x48, 0xBB, 0xCB, 0xE4, 0x88, 0x4C, 0xC0, 0x8E, 0xCF, 0xC4, 0x59, 0x90, 0x01, 0x72, 0x15} };
+#endif /* __CID_EcoMutex1Lab */
 
 /* Фабрика компонента для динамической и статической компановки */
 #ifdef ECO_DLL
 ECO_EXPORT IEcoComponentFactory* ECOCALLMETHOD GetIEcoComponentFactoryPtr();
 #elif ECO_LIB
-extern IEcoComponentFactory* GetIEcoComponentFactoryPtr_1F5DF16EE1BF43B999A434ED38FFFFFF;
+extern IEcoComponentFactory* GetIEcoComponentFactoryPtr_2F48BBCBE4884CC08ECFC45990017215;
 #endif
 
-#endif /* __ID_ECOCOMPLEX1_H__ */
+#endif /* __ID_ECO_MUTEX_1_LAB_H__ */

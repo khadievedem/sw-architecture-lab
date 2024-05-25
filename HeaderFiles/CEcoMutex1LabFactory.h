@@ -4,7 +4,7 @@
  * </кодировка символов>
  *
  * <сводка>
- *   CEcoLab2Factory
+ *   CEcoMutex1LabFactory
  * </сводка>
  *
  * <описание>
@@ -17,12 +17,12 @@
  *
  */
 
-#ifndef __C_ECOLAB1_FACTORY_H__
-#define __C_ECOLAB1_FACTORY_H__
+#ifndef __C_ECO_MUTEX_1_LAB_FACTORY_H__
+#define __C_ECO_MUTEX_1_LAB_FACTORY_H__
 
 #include "IEcoSystem1.h"
 
-typedef struct CEcoLab2Factory {
+typedef struct CEcoMutex1Lab_90017215Factory {
 
     /* Таблица функций интерфейса IEcoComponentFactory */
     IEcoComponentFactoryVTbl* m_pVTblICF;
@@ -37,6 +37,6 @@ typedef struct CEcoLab2Factory {
     char_t m_Version[16];
     char_t m_Manufacturer[64];
 
-} CEcoLab2Factory;
+} CEcoMutex1Lab_90017215Factory;
 
-#endif /* __C_ECOLAB1_FACTORY_H__ */
+#endif /* __C_ECO_MUTEX_1_LAB_FACTORY_H__ */
