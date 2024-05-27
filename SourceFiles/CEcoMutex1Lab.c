@@ -124,14 +124,15 @@ uint32_t ECOCALLMETHOD CEcoMutex1Lab_90017215_Release(/* in */ IEcoMutex1Ptr_t m
 void CEcoMutex1Lab_90017215_Lock(/* in */ IEcoMutex1Ptr_t me, /* out */ void * mutex) {
     /*CEcoMutex1Lab_90017215* pCMe = (CEcoMutex1Lab_90017215*)me; */
     
+    unsigned int locked_m = locked;
     asm (
-        "LDR      %0, =locked\n\t"
+        "LDR      %[input_mutex], %[locked_m]\n\t"
         ".l1:\n\t"
         "LDREX    r2, [r0]\n\t"
         "CMP      r2, %0\n\t"
         "BEQ         l2\n\t"
         "ITT      ne\n\t"
-        "STREXNE  r2, %0, [r0]\n\t"
+        "STREXNE  r2, %[input_mutex], [r0]\n\t"
         "CMPNE    r2, #1\n\t"
         "BEQ         l2\n\t"
         // lock acquired
@@ -140,7 +141,8 @@ void CEcoMutex1Lab_90017215_Lock(/* in */ IEcoMutex1Ptr_t me, /* out */ void * m
         ".l2:\n\t"
         "B        l1\n\t"
         : 
-        : [input_mutex] "r" (mutex)
+        : [input_mutex] "r" (mutex),
+          [locked_m] "m" (locked_m)
     );
 }
 
@@ -157,13 +159,15 @@ void CEcoMutex1Lab_90017215_Lock(/* in */ IEcoMutex1Ptr_t me, /* out */ void * m
  */
 void CEcoMutex1Lab_90017215_UnLock(/* in */ IEcoMutex1Ptr_t me, /* out */ void * mutex) {
     /*CEcoMutex1Lab_90017215* pCMe = (CEcoMutex1Lab_90017215*)me; */
+    unsigned int unlocked_m = unlocked;
     asm (
-        "LDR      %0, =unlocked\n\t"
+        "LDR      %[input_mutex], %[unlocked_m]\n\t"
         "DMB\n\t"
-        "STR      %0, [r0]\n\t"
+        "STR      %[input_mutex], [r0]\n\t"
         "BX       lr\n\t"
         : 
-        : [input_mutex] "r" (mutex)
+        : [input_mutex] "r" (mutex),
+          [unlocked_m] "m" (unlocked_m)
     );
 }
 
