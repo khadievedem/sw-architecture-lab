@@ -134,11 +134,12 @@ void CEcoMutex1Lab_90017215_Lock(/* in */ IEcoMutex1Ptr_t me, /* out */ void * m
         "ITT      ne\n\t"
         "STREXNE  r2, %[input_mutex], [r0]\n\t"
         "CMPNE    r2, #1\n\t"
-        "BEQ         l2\n\t"
+        "BEQ         l1\n\t"
         // lock acquired
         "DMB\n\t"
         "BX       lr\n\t"
         ".l2:\n\t"
+        "WFE\n\t"
         "B        l1\n\t"
         : 
         : [input_mutex] "r" (mutex),
@@ -164,6 +165,8 @@ void CEcoMutex1Lab_90017215_UnLock(/* in */ IEcoMutex1Ptr_t me, /* out */ void *
         "LDR      %[input_mutex], %[unlocked_m]\n\t"
         "DMB\n\t"
         "STR      %[input_mutex], [r0]\n\t"
+        "DSB\n\t"
+        "SEV\n\t"
         "BX       lr\n\t"
         : 
         : [input_mutex] "r" (mutex),
